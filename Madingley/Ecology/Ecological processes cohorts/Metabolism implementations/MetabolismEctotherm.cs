@@ -131,27 +131,12 @@ namespace Madingley
         public double CalculateIndividualMetabolicRate(double individualBodyMass, double temperature, double proportionTimeActive)
         {
             // Calculate field metabolic loss in kJ
-            // If body mass is <= 1.0 grams, then scaling exponent is 1, not 0.7. This is derived from Fig. 12.5 in Brown & Brown's 
-            // metabolic ecology book, and should hold down to about 10^-10g, at which point it changes once again.
-            double FieldMetabolicLosskJ;
-            double BasalMetabolicLosskJ;
-
-            if (individualBodyMass <= 1.0)
-            {
-                FieldMetabolicLosskJ = _NormalizationConstant * individualBodyMass *
+            double FieldMetabolicLosskJ = _NormalizationConstant * Math.Pow(individualBodyMass, _MetabolismMassExponent) *
                 Math.Exp(-(_ActivationEnergy / (_BoltzmannConstant * temperature)));
 
-                BasalMetabolicLosskJ = _NormalizationConstantBMR * individualBodyMass *
-                    Math.Exp(-(_ActivationEnergy / (_BoltzmannConstant * temperature)));
-            }
-            else
-            {
-                FieldMetabolicLosskJ = _NormalizationConstant * Math.Pow(individualBodyMass, _MetabolismMassExponent) *
+            double BasalMetabolicLosskJ = _NormalizationConstantBMR * Math.Pow(individualBodyMass, _BasalMetabolismMassExponent) *
                 Math.Exp(-(_ActivationEnergy / (_BoltzmannConstant * temperature)));
 
-                BasalMetabolicLosskJ = _NormalizationConstantBMR * Math.Pow(individualBodyMass, _BasalMetabolismMassExponent) *
-                Math.Exp(-(_ActivationEnergy / (_BoltzmannConstant * temperature)));
-            }
             // Return metabolic loss in grams
             return ((proportionTimeActive * FieldMetabolicLosskJ) + ((1 - proportionTimeActive) * (BasalMetabolicLosskJ))) * _EnergyScalar;
             //return FieldMetabolicLosskJ * _EnergyScalar;

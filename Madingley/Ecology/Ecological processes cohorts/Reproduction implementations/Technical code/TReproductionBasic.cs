@@ -188,7 +188,7 @@ namespace Madingley
 
                 // If track processes has been specified then add the new cohort to the process tracker 
                 if (tracker.TrackProcesses)
-                    tracker.RecordNewCohort((uint)cellEnvironment["LatIndex"][0],  (uint)cellEnvironment["LonIndex"][0],
+                    tracker.RecordNewCohort((uint)cellEnvironment["LatIndex"][0],  (uint)cellEnvironment["LonIndex"][0], 
                         currentTimestep, _OffspringCohortAbundance, gridCellCohorts[actingCohort].AdultMass, gridCellCohorts[actingCohort].FunctionalGroupIndex,
                         gridCellCohorts[actingCohort].CohortID, (uint)partial.NextCohortIDThreadLocked);
 

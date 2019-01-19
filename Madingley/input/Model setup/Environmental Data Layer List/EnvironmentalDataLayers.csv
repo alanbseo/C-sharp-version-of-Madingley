@@ -1,6 +1,8 @@
 Source,Folder,Filename,Extension,Dataset Name,Filetype,Internal Layer Name,Static,Resolution,Units
 Local,input/Data/Original,LandSeaMask,.nc,land_sea_mask,nc,LandSeaMask,Y,year,
 Local,input/Data/Original/Land,hanpp_2005,.nc,HANPP,nc,HANPP,Y,year,gC/m2/year
+Local,input/Data/Historical,SSP1_HANPP_HYDEpop_2005-2099,.nc,HANPPluc,nc,HANPPlc,N,multi-year,gC/m2/year
+Local,input/Data/Historical,SSP1_HANPP_HYDEpop_2005-2099,.nc,HANPPharvest,nc,HANPPharvest,N,multi-year,gC/m2/year
 Local,input/Data/Original/Land,AvailableWaterCapacity,.nc,AWC,nc,AWC,Y,year,mm
 Local,input/Data/Original/Land,NPP,.nc,NPP,nc,LandNPP,Y,month,gC/m2/day
 Local,input/Data/Original/Ocean,OceanNPP,.nc,NPP,nc,OceanNPP,Y,month,gC/m2/day
@@ -12,6 +14,3 @@ Local,input/Data/Original/Land,cru20,.nc,tmp,nc,Temperature,Y,month,degC
 Local,input/Data/Original/Land,cru20,.nc,dtr,nc,LandDTR,Y,month,degC
 Local,input/Data/Original/Land,cru20,.nc,pre,nc,Precipitation,Y,month,mm
 Local,input/Data/Original/Land,cru20,.nc,frs,nc,FrostDays,Y,month,
-Local,input/Data/New/Land,H_max,.nc,H_max,nc,Max_Size_10,Y,year,n/a
-Local,input/Data/New/Land,C_max,.nc,C_max,nc,Max_Size_11,Y,year,n/a
-Local,input/Data/New/Land,O_max,.nc,O_max,nc,Max_Size_12,Y,year,n/a

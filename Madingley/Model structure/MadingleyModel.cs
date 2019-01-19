@@ -67,6 +67,11 @@ namespace Madingley
         private SortedList<string, EnviroData> EnviroStack = new SortedList<string, EnviroData>();
 
         /// <summary>
+        /// A list of non-static environmental data layers
+        /// </summary>
+        private SortedList<string, EnviroData> EnviroStackTemporal = new SortedList<string, EnviroData>();
+
+        /// <summary>
         /// An instance of ModelGrid to hold the grid to be used in this model
         /// </summary>
         private ModelGrid EcosystemModelGrid;
@@ -670,6 +675,7 @@ namespace Madingley
             CohortFunctionalGroupDefinitions = initialisation.CohortFunctionalGroupDefinitions;
             StockFunctionalGroupDefinitions = initialisation.StockFunctionalGroupDefinitions;
             EnviroStack = initialisation.EnviroStack;
+            EnviroStackTemporal = initialisation.EnviroStackTemporal;
             _HumanNPPScenario = scenarioParameters.scenarioParameters.ElementAt(scenarioIndex).Item3["npp"];
             _TemperatureScenario = scenarioParameters.scenarioParameters.ElementAt(scenarioIndex).Item3["temperature"];
             _HarvestingScenario = scenarioParameters.scenarioParameters.ElementAt(scenarioIndex).Item3["harvesting"];
@@ -762,8 +768,9 @@ namespace Madingley
             {
                 // Set up the model grid using these locations
                 EcosystemModelGrid = new ModelGrid(BottomLatitude, LeftmostLongitude, TopLatitude, RightmostLongitude,
-                    CellSize, CellSize, _CellList, EnviroStack, CohortFunctionalGroupDefinitions, StockFunctionalGroupDefinitions,
-                    GlobalDiagnosticVariables, initialisation.TrackProcesses, SpecificLocations, RunGridCellsInParallel,GlobalModelTimeStepUnit);
+                    CellSize, CellSize, _CellList, EnviroStack, EnviroStackTemporal, CohortFunctionalGroupDefinitions, StockFunctionalGroupDefinitions,
+                    GlobalDiagnosticVariables, initialisation.TrackProcesses, SpecificLocations,RunGridCellsInParallel);
+
             }
             else
             {
@@ -797,8 +804,8 @@ namespace Madingley
                 // Set up a full model grid (i.e. not for specific locations)
                 // Set up the model grid using these locations
                 EcosystemModelGrid = new ModelGrid(BottomLatitude, LeftmostLongitude, TopLatitude, RightmostLongitude,
-                    CellSize, CellSize, _CellList, EnviroStack, CohortFunctionalGroupDefinitions, StockFunctionalGroupDefinitions,
-                    GlobalDiagnosticVariables, initialisation.TrackProcesses, SpecificLocations, RunGridCellsInParallel, GlobalModelTimeStepUnit);
+                    CellSize, CellSize, _CellList, EnviroStack, EnviroStackTemporal, CohortFunctionalGroupDefinitions, StockFunctionalGroupDefinitions,
+                    GlobalDiagnosticVariables, initialisation.TrackProcesses, SpecificLocations, RunGridCellsInParallel);
 
                 List<int> cellsToRemove = new List<int>();
                 if (initialisation.RunRealm == "terrestrial")
@@ -880,7 +887,7 @@ namespace Madingley
             {
                 EcosystemModelGrid.SeedGridCellStocksAndCohorts(_CellList, CohortFunctionalGroupDefinitions, StockFunctionalGroupDefinitions,
                     GlobalDiagnosticVariables, ref NextCohortID, InitialisationFileStrings["OutputDetail"] == "high", DrawRandomly,
-                    initialisation.DispersalOnly, InitialisationFileStrings["DispersalOnlyType"], RunGridCellsInParallel, EnviroStack,CellSize,CellSize);
+                    initialisation.DispersalOnly, InitialisationFileStrings["DispersalOnlyType"], RunGridCellsInParallel);
             }
 
             Console.ForegroundColor = ConsoleColor.Red;
@@ -1179,8 +1186,6 @@ namespace Madingley
 
             }
 
-            //RandomCohortOrder = Utilities.MassOrderedIndices(workingGridCellCohorts, CohortIndices, TotalCohortNumber);
-
             if (DrawRandomly)
             {
                 // Randomly order the cohort indices
@@ -1255,11 +1260,8 @@ namespace Madingley
             // Merge cohorts, if necessary
             if (workingGridCellCohorts.GetNumberOfCohorts() > initialisation.MaxNumberOfCohorts)
             {
-                // FG target specific merger
-                //partial.Combinations = CohortMerger.MergeToReachThresholdFast(workingGridCellCohorts, workingGridCellCohorts.GetNumberOfCohortsPerFG(), initialisation.MaxNumberOfCohortsPerFG);
-                
-                partial.Combinations = CohortMerger.MergeToReachThresholdFast( workingGridCellCohorts, workingGridCellCohorts.GetNumberOfCohorts(), initialisation.MaxNumberOfCohorts);
-                
+                partial.Combinations = CohortMerger.MergeToReachThresholdFast(workingGridCellCohorts, workingGridCellCohorts.GetNumberOfCohorts(), initialisation.MaxNumberOfCohorts);
+
                 //Run extinction a second time to remove those cohorts that have been set to zero abundance when merging
                 RunExtinction(latCellIndex, lonCellIndex, partial, workingGridCellCohorts, cellIndex);
             }

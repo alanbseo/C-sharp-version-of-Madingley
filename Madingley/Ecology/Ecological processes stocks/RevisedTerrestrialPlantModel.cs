@@ -408,17 +408,10 @@ namespace Madingley
             // Calculate fractional allocation to structural tissue
             double FracStruct = this.CalculateFracStruct(NPP);
 
-            // Estimate monthly NPP based on daily seasonality layer
-            if (GlobalModelTimeStepUnit == "day")
-            {
-                uint day = currentTimeStep % 360;
-                NPP *= 30 * cellEnvironment["Seasonality"][day];
-            }
-            // Estimate monthly NPP based on monthly seasonality layer
-            else
-            {
-                NPP *= cellEnvironment["Seasonality"][currentMonth];
-            }
+            // Estimate monthly NPP based on seasonality layer
+            NPP *= cellEnvironment["Seasonality"][currentMonth];
+
+
             // Calculate leaf mortality rates
             double AnnualLeafMortRate;
             double MonthlyLeafMortRate;

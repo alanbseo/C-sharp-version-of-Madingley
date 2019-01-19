@@ -133,18 +133,6 @@ namespace Madingley
         }
 
         /// <summary>
-        /// Whether this cohort has been merged with another cohort this time step
-        /// </summary>
-        /// 
-        private Boolean _MergedThisTimeStep;
-
-        public Boolean MergedThisTimeStep
-        {
-            get { return _MergedThisTimeStep; }
-            set { _MergedThisTimeStep = value; }
-        }
-
-        /// <summary>
         /// The proportion of the timestep for which this cohort is active
         /// </summary>
         private double _ProportionTimeActive;

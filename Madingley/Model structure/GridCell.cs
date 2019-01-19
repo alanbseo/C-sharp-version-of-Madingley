@@ -109,8 +109,6 @@ namespace Madingley
         // Optimal prey body size, as a ratio of predator body size
         private double OptimalPreyBodySizeRatio;
 
-        
-
         /// <summary>
         /// Constructor for a grid cell; creates cell and reads in environmental data
         /// </summary>
@@ -128,9 +126,9 @@ namespace Madingley
         /// <param name="tracking">Whether process-tracking is enabled</param>
         /// <param name="specificLocations">Whether the model is being run for specific locations</param>
         public GridCell(float latitude, uint latIndex, float longitude, uint lonIndex, float latCellSize, float lonCellSize, 
-            SortedList<string, EnviroData> dataLayers, double missingValue, FunctionalGroupDefinitions cohortFunctionalGroups, 
+            SortedList<string, EnviroData> dataLayers, SortedList<string, EnviroData> dataLayersT, double missingValue, FunctionalGroupDefinitions cohortFunctionalGroups, 
             FunctionalGroupDefinitions stockFunctionalGroups, SortedList<string, double> globalDiagnostics,Boolean tracking,
-            bool specificLocations, string globalModelTimeStepUnit)
+            bool specificLocations)
         {
 
             // Boolean to track when environmental data are missing
@@ -233,12 +231,6 @@ namespace Madingley
             tempVector[0] = missingValue;
             _CellEnvironment.Add("Missing Value", tempVector);
 
-
-            //Add an environmental value for HANPP
-            tempVector = new double[1];
-            tempVector[0] = missingValue;
-            _CellEnvironment.Add("RelativeHANPP", tempVector);
-
             // Loop through environmental data layers and extract values for this grid cell
             // Also standardise missing values
 
@@ -259,6 +251,31 @@ namespace Madingley
                 // Add the values of the environmental variables to the cell environment, with the name of the variable as the key
                 _CellEnvironment.Add(LayerName, tempVector);
             }
+
+
+
+
+
+
+            // Loop over variables in the list of non-static environmental data
+            foreach (string LayerName in dataLayersT.Keys)
+            {
+                // Initiliase the temporary vector of values to be equal to the number of time intervals in the environmental variable
+                tempVector = new double[dataLayersT[LayerName].NumTimes];
+                // Loop over the time intervals in the environmental variable
+                for (int hh = 0; hh < dataLayersT[LayerName].NumTimes; hh++)
+                {
+                    // Add the value of the environmental variable at this time interval to the temporary vector
+                    tempVector[hh] = dataLayersT[LayerName].GetValue(_Latitude, _Longitude, (uint)hh, out EnviroMissingValue, latCellSize, lonCellSize);
+                    // If the environmental variable is a missing value, then change the value to equal the standard missing value for this cell
+                    if (EnviroMissingValue)
+                        tempVector[hh] = missingValue;
+                }
+                // Add the values of the environmental variables to the cell environment, with the name of the variable as the key
+                _CellEnvironment.Add(LayerName, tempVector);
+            }
+
+
 
 
 
@@ -343,7 +360,7 @@ namespace Madingley
             if (_CellEnvironment.ContainsKey("SST")) _CellEnvironment.Remove("SST");
 
             // CREATE NPP SEASONALITY LAYER
-            _CellEnvironment.Add("Seasonality", CalculateNPPSeasonality(_CellEnvironment["NPP"], _CellEnvironment["Missing Value"][0], globalModelTimeStepUnit));
+            _CellEnvironment.Add("Seasonality", CalculateNPPSeasonality(_CellEnvironment["NPP"], _CellEnvironment["Missing Value"][0]));
 
             // Calculate other climate variables from temperature and precipitation
             // Declare an instance of the climate variables calculator
@@ -379,11 +396,8 @@ namespace Madingley
 
             // Designate a breeding season for this grid cell, where a month is considered to be part of the breeding season if its NPP is at
             // least 80% of the maximum NPP throughout the whole year
-            //double[] BreedingSeason = new double[12];
-            //for (int i = 0; i < 12; i++)
-            // breeding season is all days when NPP is at least 50% of the maximum NPP during the year
-            double[] BreedingSeason = new double[_CellEnvironment["Seasonality"].Count()];
-            for (int i = 0; i < BreedingSeason.Count(); i++)
+            double[] BreedingSeason = new double[12];
+            for (int i = 0; i < 12; i++)
             {
                 if ((_CellEnvironment["Seasonality"][i] / _CellEnvironment["Seasonality"].Max()) > 0.5)
                 {
@@ -455,12 +469,6 @@ namespace Madingley
             return ContainsMV;
         }
 
-        // interpolate function used to interpolate NPP from months to days
-        double interpolate(double x0, double y0, double x1, double y1, double x)
-        {
-            return y0 * (x - x1) / (x0 - x1) + y1 * (x - x0) / (x1 - x0);
-        }
-
         /// <summary>
         /// Calculate monthly seasonality values of Net Primary Production - ignores missing values. If there is no NPP data (ie all zero or missing values)
         /// then assign 1/12 for each month.
@@ -468,107 +476,49 @@ namespace Madingley
         /// <param name="NPP">Monthly values of NPP</param>
         /// <param name="missingValue">Missing data value to which the data will be compared against</param>
         /// <returns>The contribution that each month's NPP makes to annual NPP</returns>
-        public double[] CalculateNPPSeasonality(double[] NPP, double missingValue, string globalModelTimeStepUnit)
+        public double[] CalculateNPPSeasonality(double[] NPP, double missingValue)
         {
 
             // Check that the NPP data is of monthly temporal resolution
-            if (globalModelTimeStepUnit == "day")
+            Debug.Assert(NPP.Length == 12, "Error: currently NPP data must be of monthly temporal resolution");
+
+            // Temporary vector to hold seasonality values
+            double[] NPPSeasonalityValues = new double[12];
+
+            // Loop over months and calculate total annual NPP
+            double TotalNPP = 0.0;
+            for (int i = 0; i < 12; i++)
             {
-                double[] NPPSeasonalityValues = new double[360];
-                {
-                    int x = 0;
-                    int x0 = 0;
-                    int x1 = 30;
-                    double y0;
-                    double y1;
-                    double[] NPPValues = new double[360];
-                    double TotalNPP = 0;
-                    for (int y = 0; y < 360; y++)
-                    {
-                        int i = (int)Math.Floor((double)y / 30);
-                        x = y % 30;
-                        if (NPP[i].CompareTo(missingValue) != 0 && NPP[i].CompareTo(0.0) > 0)
-                        {
-                            if (i < 11)
-                            {
-                                x0 = 0;
-                                x1 = 30;
-                                y0 = NPP[i];
-                                y1 = NPP[i + 1];
-                            }
-                            else
-                            {
-                                x0 = 0;
-                                x1 = 30;
-                                y0 = NPP[11];
-                                y1 = NPP[0];
-                            }
-                            NPPValues[y] = interpolate(x0, y0, x1, y1, x);
-                            TotalNPP += NPPValues[y];
-                        }
-                        else
-                        {
-                            NPPValues[y] = 0.0;
-                        }
-                    }
-                    if (TotalNPP.CompareTo(0.0) == 0)
-                    {
-                        // Loop over months and calculate seasonality
-                        // If there is no NPP value then asign a uniform flat seasonality
-                        NPPSeasonalityValues = Enumerable.Repeat<double>(1 / 360, 360).ToArray();
-                    }
-                    else
-                        for (int i = 0; i < 360; i++)
-                        {
-                            NPPSeasonalityValues[i] = NPPValues[i] / TotalNPP;
-                        }
-                }
-                return (NPPSeasonalityValues);
+                if (NPP[i].CompareTo(missingValue) != 0 && NPP[i].CompareTo(0.0) > 0) TotalNPP += NPP[i];
             }
-            else //if time unit is Month
+            if (TotalNPP.CompareTo(0.0) == 0)
             {
-
-                // Check that the NPP data is of monthly temporal resolution
-                // Debug.Assert(NPP.Length == 12, "Error: currently NPP data must be of monthly temporal resolution");
-
-                // Temporary vector to hold seasonality values
-                double[] NPPSeasonalityValues = new double[12];
-
-                // Loop over months and calculate total annual NPP
-                double TotalNPP = 0.0;
+                // Loop over months and calculate seasonality
+                // If there is no NPP value then asign a uniform flat seasonality
                 for (int i = 0; i < 12; i++)
                 {
-                    if (NPP[i].CompareTo(missingValue) != 0 && NPP[i].CompareTo(0.0) > 0) TotalNPP += NPP[i];
-                }
-                if (TotalNPP.CompareTo(0.0) == 0)
-                {
-                    // Loop over months and calculate seasonality
-                    // If there is no NPP value then asign a uniform flat seasonality
-                    for (int i = 0; i < 12; i++)
-                    {
-                        NPPSeasonalityValues[i] = 1.0 / 12.0;
-                    }
-
-                }
-                else
-                {
-                    // Some NPP data exists for this grid cell so use that to infer the NPP seasonality
-                    // Loop over months and calculate seasonality
-                    for (int i = 0; i < 12; i++)
-                    {
-                        if (NPP[i].CompareTo(missingValue) != 0 && NPP[i].CompareTo(0.0) > 0)
-                        {
-                            NPPSeasonalityValues[i] = NPP[i] / TotalNPP;
-                        }
-                        else
-                        {
-                            NPPSeasonalityValues[i] = 0.0;
-                        }
-                    }
+                    NPPSeasonalityValues[i] = 1.0/12.0;
                 }
 
-                return NPPSeasonalityValues;
             }
+            else
+            {
+                // Some NPP data exists for this grid cell so use that to infer the NPP seasonality
+                // Loop over months and calculate seasonality
+                for (int i = 0; i < 12; i++)
+                {
+                    if (NPP[i].CompareTo(missingValue) != 0 && NPP[i].CompareTo(0.0) > 0)
+                    {
+                        NPPSeasonalityValues[i] = NPP[i] / TotalNPP;
+                    }
+                    else
+                    {
+                        NPPSeasonalityValues[i] = 0.0;
+                    }
+                }
+            }
+
+            return NPPSeasonalityValues;
         }
 
         /// <summary>
@@ -584,11 +534,11 @@ namespace Madingley
         /// <param name="DrawRandomly">Whether the model is set to use random draws</param>
         /// <param name="ZeroAbundance">Set this parameter to 'true' if you want to seed the cohorts with zero abundance</param>
         public void SeedGridCellCohortsAndStocks(FunctionalGroupDefinitions cohortFunctionalGroups, FunctionalGroupDefinitions stockFunctionalGroups,
-            SortedList<string, double> globalDiagnostics, Int64 nextCohortID, Boolean tracking, double totalCellTerrestrialCohorts,
-            double totalCellMarineCohorts, Boolean DrawRandomly, Boolean ZeroAbundance, SortedList<string, EnviroData> dataLayers, float latCellSize, float lonCellSize)
+            SortedList<string, double> globalDiagnostics, Int64 nextCohortID, Boolean tracking, double totalCellTerrestrialCohorts, 
+            double totalCellMarineCohorts, Boolean DrawRandomly, Boolean ZeroAbundance)
         {
             SeedGridCellCohorts(ref cohortFunctionalGroups, ref _CellEnvironment, globalDiagnostics, nextCohortID, tracking, 
-                totalCellTerrestrialCohorts, totalCellMarineCohorts, DrawRandomly, ZeroAbundance,dataLayers,latCellSize,lonCellSize);
+                totalCellTerrestrialCohorts, totalCellMarineCohorts, DrawRandomly, ZeroAbundance);
             SeedGridCellStocks(ref stockFunctionalGroups, ref _CellEnvironment, globalDiagnostics);
         }
 
@@ -684,7 +634,7 @@ namespace Madingley
         /// <param name="ZeroAbundance">Set this parameter to 'true' if you want to seed the cohorts with zero abundance</param>
         private void SeedGridCellCohorts(ref FunctionalGroupDefinitions functionalGroups, ref SortedList<string, double[]>
             cellEnvironment, SortedList<string, double> globalDiagnostics, Int64 nextCohortID, Boolean tracking, double totalCellTerrestrialCohorts, 
-            double totalCellMarineCohorts, Boolean DrawRandomly, Boolean ZeroAbundance,SortedList<string, EnviroData> dataLayers, float latCellSize,float lonCellSize)
+            double totalCellMarineCohorts, Boolean DrawRandomly, Boolean ZeroAbundance)
         {
             // Set the seed for the random number generator from the system time
             RandomNumberGenerator.SetSeedFromSystemTime();
@@ -705,21 +655,6 @@ namespace Madingley
             double[] MassMinima = functionalGroups.GetBiologicalPropertyAllFunctionalGroups("minimum mass");
             double[] MassMaxima = functionalGroups.GetBiologicalPropertyAllFunctionalGroups("maximum mass");
             string[] NutritionSource = functionalGroups.GetTraitValuesAllFunctionalGroups("nutrition source");
-
-            // Boolean to track when environmental data are missing
-            Boolean EnviroMissingValue;
-            double M;
-            //Look to see if spatially explicit maximum body sizes have been provided for any functional groups
-            for (int FunctionalGroup = 0; FunctionalGroup < functionalGroups.GetNumberOfFunctionalGroups(); FunctionalGroup++)
-            {
-                string LayerName = "Max_Size_"+Convert.ToString(FunctionalGroup);
-                if(dataLayers.Keys.Contains(LayerName))
-                {
-                    M = dataLayers[LayerName].GetMaxValue(_Latitude, _Longitude, (uint)0, out EnviroMissingValue, latCellSize, lonCellSize);
-                    if (!EnviroMissingValue) MassMaxima[FunctionalGroup] = M;
-                }
-            }
-
 
             double[] ProportionTimeActive = functionalGroups.GetBiologicalPropertyAllFunctionalGroups("proportion suitable time active");
 

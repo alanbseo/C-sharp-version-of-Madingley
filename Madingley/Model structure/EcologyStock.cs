@@ -72,7 +72,21 @@ namespace Madingley
             GlobalProcessTracker globalTracker, uint currentMonth, 
             string outputDetail, bool specificLocations, Boolean impactCell)
         {
-            if (madingleyStockDefinitions.GetTraitNames("Realm", actingStock[0]) == "marine")
+
+
+            int ScenarioYear;
+            if (currentTimeStep < burninSteps)
+            {
+                ScenarioYear = 0;
+            } else
+            {
+                ScenarioYear = (int)Math.Floor((currentTimeStep - burninSteps) / 12.0);
+            }
+
+
+
+
+                if (madingleyStockDefinitions.GetTraitNames("Realm", actingStock[0]) == "marine")
             {
                 // Run the autotroph processor
                 MarineNPPtoAutotrophStock.ConvertNPPToAutotroph(cellEnvironment, gridCellStocks, actingStock, environmentalDataUnits["LandNPP"], 
@@ -87,8 +101,7 @@ namespace Madingley
                     outputDetail, specificLocations);
                         
                 double fhanpp = HANPP.RemoveHumanAppropriatedMatter(WetMatterNPP, cellEnvironment, humanNPPScenario, gridCellStocks, actingStock, 
-                    currentTimeStep,burninSteps,impactSteps,recoverySteps,instantStep, numInstantSteps,impactCell, globalModelTimeStepUnit);
-
+                    currentTimeStep, ScenarioYear, burninSteps, impactSteps,recoverySteps,instantStep, numInstantSteps,impactCell, globalModelTimeStepUnit);
 
                 // Apply human appropriation of NPP
                 gridCellStocks[actingStock].TotalBiomass += WetMatterNPP * (1.0 - fhanpp);

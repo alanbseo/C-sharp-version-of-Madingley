@@ -190,8 +190,6 @@ namespace Madingley
         /// <param name="madingleyStockDefinitions">The functional group definitions for stocks  in the model</param>
         public void GetEatingPotentialTerrestrial(GridCellCohortHandler gridCellCohorts, GridCellStockHandler gridCellStocks, int[] actingCohort, SortedList<string, double[]> cellEnvironment, FunctionalGroupDefinitions madingleyCohortDefinitions, FunctionalGroupDefinitions madingleyStockDefinitions)
         {
-            double DensityScaling = Math.Max(0.01, 1.0 - cellEnvironment["RelativeHANPP"][0]);
-            //double DensityScaling = 1.0;
             // Set the total biomass eaten by the acting cohort to zero
             _TotalBiomassEatenByCohort = 0.0;
 
@@ -220,9 +218,6 @@ namespace Madingley
                 {
                     // Get the mass from this stock that is available for eating (assumes only 10% is edible)
                     EdibleMass = gridCellStocks[FunctionalGroup][i].TotalBiomass* 0.1;
-
-                    //Scale Edible mass by the current fractional hanpp to adjust the density
-                    EdibleMass = EdibleMass / DensityScaling;
 
                     // Calculate the potential biomass eaten from this stock by the acting cohort
                     _PotentialBiomassesEaten[FunctionalGroup][i] = CalculatePotentialBiomassEatenTerrestrial(EdibleMass, _BodyMassHerbivore);

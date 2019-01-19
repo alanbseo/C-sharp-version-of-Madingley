@@ -243,10 +243,9 @@ namespace Madingley
             
     {
             // Calculate the killing rate of an individual predator per unit prey density per hectare per time unit
-            Alphaij = CalculateIndividualKillingRatePerHectare(preyIndividualMass, preyMassBinNumber, preyFunctionalGroup, predatorIndividualMass, logOptimalPreyPredatorMassRatio);
+        Alphaij = CalculateIndividualKillingRatePerHectare(preyIndividualMass, preyMassBinNumber, preyFunctionalGroup, predatorIndividualMass, logOptimalPreyPredatorMassRatio);
                         
             // Calculate the potential number of prey killed given the number of prey detections
-            //return Alphaij * Math.Pow(preyAbundance / _CellAreaHectares,2.0);
             return Alphaij * preyAbundance / _CellAreaHectares;
         }
 
@@ -271,7 +270,7 @@ namespace Madingley
             Alphaij = CalculateIndividualKillingRatePerHectare(preyIndividualMass, preyMassBinNumber, preyFunctionalGroup, predatorIndividualMass, logOptimalPreyPredatorMassRatio);
             
             // Calculate the potential number of prey killed given the number of prey detections
-            return Alphaij * Math.Pow(preyAbundance / _CellAreaHectares,2.0);
+            return Alphaij * preyAbundance / _CellAreaHectares;
         }
 
         // Original
@@ -296,7 +295,7 @@ namespace Madingley
                     _FeedingPreferenceStandardDeviation), 2)));
 
             // Calculate the individual killing rate
-            return _SpecificPredatorKillRateConstant * RelativeFeedingPreference *BinnedPreyDensities[preyFunctionalGroup, preyMassBinNumber];
+            return _SpecificPredatorKillRateConstant * RelativeFeedingPreference * BinnedPreyDensities[preyFunctionalGroup, preyMassBinNumber];
         }     
 
         /// <summary>

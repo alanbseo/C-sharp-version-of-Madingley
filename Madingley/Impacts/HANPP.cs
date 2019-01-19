@@ -39,7 +39,7 @@ namespace Madingley
         /// temporary = constant after burn-in until specified time; value = proportion of plant biomass appropriated</remarks>
         public double RemoveHumanAppropriatedMatter(double wetMatterNPP, SortedList<string, double[]> cellEnvironment,
             Tuple<string, double, double> humanNPPScenario, GridCellStockHandler
-            gridCellStocks, int[] actingStock, uint currentTimestep, uint burninSteps,
+            gridCellStocks, int[] actingStock, uint currentTimestep, int scenarioYear, uint burninSteps,
             uint impactSteps, uint recoverySteps, uint instantStep, uint numInstantStep, Boolean impactCell,
             string globalModelTimestepUnits)
         {
@@ -70,6 +70,7 @@ namespace Madingley
                         // Get the total amount of NPP appropriated by humans from this cell
                         double HANPP = cellEnvironment["HANPP"][0];
 
+                         
                         // If HANPP value is missing, then assume zero
                         if (HANPP == cellEnvironment["Missing Value"][0]) HANPP = 0.0;
 
@@ -89,7 +90,7 @@ namespace Madingley
                         // Convert gC/m2/month to gC/km2/month
                         HANPP *= m2Tokm2Conversion;
 
-                        // Multiply by cell area (in km2) to get g/cell/month
+                        // Multiply by cell area (in km2) to get g/cell/day
                         HANPP *= cellEnvironment["Cell Area"][0];
 
 
@@ -114,8 +115,75 @@ namespace Madingley
 
                         //if (gridCellStocks[actingStock].TotalBiomass < 0.0) gridCellStocks[actingStock].TotalBiomass = 0.0;
                     }
-                }
-                else if (humanNPPScenario.Item1 == "no")
+                } else if (humanNPPScenario.Item1 == "hanppmulti")
+                {
+
+                    if (currentTimestep > burninSteps)
+                    {
+                        // Loop over stocks in the grid cell and calculate the total biomass of all stocks
+                        double TotalAutotrophBiomass = 0.0;
+                        foreach (var stockFunctionalGroup in gridCellStocks)
+                        {
+                            for (int i = 0; i < stockFunctionalGroup.Count; i++)
+                            {
+                                TotalAutotrophBiomass += stockFunctionalGroup[i].TotalBiomass;
+                            }
+                        }
+
+                        // Get the total amount of NPP appropriated by humans from this cell
+                        double HANPPh = cellEnvironment["HANPPharvest"][scenarioYear];
+                        double HANPPlc = cellEnvironment["HANPPlc"][scenarioYear];
+
+                        // If HANPP value is missing, then assume zero
+                        if (HANPPh == cellEnvironment["Missing Value"][0]) HANPPh = 0.0;
+                        if (HANPPlc == cellEnvironment["Missing Value"][0]) HANPPlc = 0.0;
+
+                        HANPPh *= cellEnvironment["Seasonality"][currentTimestep % 12];
+                        HANPPlc *= cellEnvironment["Seasonality"][currentTimestep % 12];
+
+                        //Combine harvest and land change terms
+                        double HANPP = HANPPh + HANPPlc;
+
+                        // Allocate HANPP for this stock according to the proportion of total autotroph biomass that the stock represents
+                        if (TotalAutotrophBiomass == 0.0)
+                        {
+                            HANPP = 0.0;
+                        }
+                        else
+                        {
+                            HANPP *= (gridCellStocks[actingStock].TotalBiomass / TotalAutotrophBiomass);
+                        }
+
+
+                        // Convert gC/m2/month to gC/km2/month
+                        HANPP *= m2Tokm2Conversion;
+
+                        // Multiply by cell area (in km2) to get g/cell/day
+                        HANPP *= cellEnvironment["Cell Area"][0];
+
+
+                        // Convert from gC to g dry matter
+                        double DryMatterAppropriated = HANPP * 2;
+
+                        // Convert from g dry matter to g wet matter
+                        double WetMatterAppropriated = DryMatterAppropriated * 2;
+
+
+                        //Calculate the rate of HANPP offtake
+                        if (wetMatterNPP.CompareTo(0.0) == 0)
+                        {
+                            RemovalRate = 0.0;
+                        }
+                        else
+                        {
+                            RemovalRate = Math.Min(1.0, WetMatterAppropriated / wetMatterNPP);
+                        }
+                        // Remove human appropriated autotroph biomass from total autotroph biomass
+                        //gridCellStocks[actingStock].TotalBiomass -= WetMatterAppropriated;
+
+                        //if (gridCellStocks[actingStock].TotalBiomass < 0.0) gridCellStocks[actingStock].TotalBiomass = 0.0;
+                    }
+                } else if (humanNPPScenario.Item1 == "no")
                 {
                     // Do not remove any autotroph biomass
                 }
@@ -233,7 +301,6 @@ namespace Madingley
 
             }
 
-            cellEnvironment["RelativeHANPP"][0] = RemovalRate;
             return(RemovalRate);
         }
         

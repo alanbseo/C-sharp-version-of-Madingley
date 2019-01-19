@@ -285,20 +285,6 @@ namespace Madingley
             set { _MaxNumberOfCohorts = value; }
         }
 
-        /// <summary>
-        /// The maximum number of cohorts per grid cell for each functional group
-        /// </summary>
-        /// 
-        private double[] _MaxNumberOfCohortsPerFG;
-
-        /// <summary>
-        ///  Get and set the maximum number of cohorts per functional group
-        /// </summary>
-        public double[] MaxNumberOfCohortsPerFG
-        {
-            get { return _MaxNumberOfCohortsPerFG; }
-            set { _MaxNumberOfCohortsPerFG = value; }
-        }
 
         /// <summary>
         /// Whether to run only dispersal (i.e. turn all other ecological processes off, and set dispersal probability to one temporarily)
@@ -377,6 +363,22 @@ namespace Madingley
             get { return _EnviroStack; }
             set { _EnviroStack = value; }
         }
+
+
+        /// <summary>
+        /// The environmental layers for use in the model
+        /// </summary>
+        private SortedList<string, EnviroData> _EnviroStackTemporal = new SortedList<string, EnviroData>();
+        /// <summary>
+        /// Get and set the environmental layers for use in the model
+        /// </summary>
+        public SortedList<string, EnviroData> EnviroStackTemporal
+        {
+            get { return _EnviroStackTemporal; }
+            set { _EnviroStackTemporal = value; }
+        }
+
+
 
 
         /// <summary>
@@ -725,7 +727,6 @@ namespace Madingley
                         break;
                     case "maximum number of cohorts":
                         _MaxNumberOfCohorts = Convert.ToInt32(VarValues.GetValue(row));
-                        _MaxNumberOfCohortsPerFG = new double[] { 125, 125, 125, 125, 125, 125, 125, 125, 125, 125, 111, 111, 111, 111, 111, 111, 111, 111, 111 };
                         break;
                     case "read state":
                         if (VarValues.GetValue(row).ToString() != "")
@@ -1200,42 +1201,67 @@ namespace Madingley
                 // If the layers are not static, then suffix the file name with '1' - not currently implemented
                 if (StaticLayer[ii].ToLower().Equals("n"))
                 {
-                    Debug.Fail("This option is currently not supported");
-                    Filenames[ii] = Filenames[ii] + "1";
-                }
-                if (Sources[ii].ToLower().Equals("local"))
-                {
-                    // For layers where the file format is ESRI ASCII grid, the dataset name is the same as the file name
-                    if (FileTypes[ii].ToLower().Equals("esriasciigrid"))
+                    //Debug.Fail("This option is currently not supported");
+                    //Filenames[ii] = Filenames[ii] + "1";
+                    if (Sources[ii].ToLower().Equals("local"))
                     {
-                        DatasetNames[ii] = Filenames[ii];
-                    }
-                    // Generate the appropriate file name for the environmental data layer
-                    if (Folders[ii].ToLower().Equals("input"))
-                    {
-                        TempFilename = "input/Data/" + Filenames[ii];
-                    }
-                    else
-                    {
-                        TempFilename = Folders[ii] + "/" + Filenames[ii];
-                    }
-                    Filenames[ii] = TempFilename + Extensions[ii];
-                    // Read in and store the environmental data
-                    EnviroStack.Add(LayerName[ii], new EnviroData(Filenames[ii], DatasetNames[ii], FileTypes[ii], Resolutions[ii], MethodUnits[ii]));
-                }
-                else if (Sources[ii].ToLower().Equals("fetchclimate"))
-                {
-
-                    if (!EnviroStack.ContainsKey(LayerName[ii]))
-                        if (_SpecificLocations)
+                        // For layers where the file format is ESRI ASCII grid, the dataset name is the same as the file name
+                        if (FileTypes[ii].ToLower().Equals("esriasciigrid"))
                         {
-                            EnviroStack.Add(LayerName[ii], new EnviroData(DatasetNames[ii], Resolutions[ii], (double)BottomLatitude, (double)LeftmostLongitude, (double)TopLatitude, (double)RightmostLongitude, (double)CellSize, _CellList, EnvironmentalDataSource.ANY));
+                            DatasetNames[ii] = Filenames[ii];
+                        }
+                        // Generate the appropriate file name for the environmental data layer
+                        if (Folders[ii].ToLower().Equals("input"))
+                        {
+                            TempFilename = "input/Data/" + Filenames[ii];
                         }
                         else
                         {
-                            EnviroStack.Add(LayerName[ii], new EnviroData(DatasetNames[ii], Resolutions[ii], (double)BottomLatitude, (double)LeftmostLongitude, (double)TopLatitude, (double)RightmostLongitude, (double)CellSize, EnvironmentalDataSource.ANY));
+                            TempFilename = Folders[ii] + "/" + Filenames[ii];
                         }
+                        Filenames[ii] = TempFilename + Extensions[ii];
+                        // Read in and store the environmental data
+                        EnviroStackTemporal.Add(LayerName[ii], new EnviroData(Filenames[ii], DatasetNames[ii], FileTypes[ii], Resolutions[ii], MethodUnits[ii]));
+                    }
 
+
+                }
+                else
+                {
+                    if (Sources[ii].ToLower().Equals("local"))
+                    {
+                        // For layers where the file format is ESRI ASCII grid, the dataset name is the same as the file name
+                        if (FileTypes[ii].ToLower().Equals("esriasciigrid"))
+                        {
+                            DatasetNames[ii] = Filenames[ii];
+                        }
+                        // Generate the appropriate file name for the environmental data layer
+                        if (Folders[ii].ToLower().Equals("input"))
+                        {
+                            TempFilename = "input/Data/" + Filenames[ii];
+                        }
+                        else
+                        {
+                            TempFilename = Folders[ii] + "/" + Filenames[ii];
+                        }
+                        Filenames[ii] = TempFilename + Extensions[ii];
+                        // Read in and store the environmental data
+                        EnviroStack.Add(LayerName[ii], new EnviroData(Filenames[ii], DatasetNames[ii], FileTypes[ii], Resolutions[ii], MethodUnits[ii]));
+                    }
+                    else if (Sources[ii].ToLower().Equals("fetchclimate"))
+                    {
+
+                        if (!EnviroStack.ContainsKey(LayerName[ii]))
+                            if (_SpecificLocations)
+                            {
+                                EnviroStack.Add(LayerName[ii], new EnviroData(DatasetNames[ii], Resolutions[ii], (double)BottomLatitude, (double)LeftmostLongitude, (double)TopLatitude, (double)RightmostLongitude, (double)CellSize, _CellList, EnvironmentalDataSource.ANY));
+                            }
+                            else
+                            {
+                                EnviroStack.Add(LayerName[ii], new EnviroData(DatasetNames[ii], Resolutions[ii], (double)BottomLatitude, (double)LeftmostLongitude, (double)TopLatitude, (double)RightmostLongitude, (double)CellSize, EnvironmentalDataSource.ANY));
+                            }
+
+                    }
                 }
             }
             Console.WriteLine("\n\n");
