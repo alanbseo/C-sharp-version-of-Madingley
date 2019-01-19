@@ -107,14 +107,8 @@ namespace Madingley
             
             foreach (var Biomass in deltas["biomass"])
             {
-                if (Biomass.Key != "respiring biomass")  
-                {  
-                    // Add the delta biomass to net biomass  
-                    BodyMassIncludingChangeThisTimeStep += Biomass.Value;  
-                }  
-                else  
-                ;  
-
+                // Add the delta biomass to net biomass
+                BodyMassIncludingChangeThisTimeStep += Biomass.Value;
 
             }
 
@@ -186,15 +180,15 @@ namespace Madingley
 
                 // Create the offspring cohort
                 OffspringCohort = new Cohort((byte)actingCohort[0], OffspringJuvenileAndAdultBodyMasses[0], OffspringJuvenileAndAdultBodyMasses[1], OffspringJuvenileAndAdultBodyMasses[0],
-                                                    _OffspringCohortAbundance,0.0, Math.Exp(gridCellCohorts[actingCohort].LogOptimalPreyBodySizeRatio),
-                                                    currentTimestep, gridCellCohorts[actingCohort].ProportionTimeActive, ref partial.NextCohortIDThreadLocked,TrophicIndex, tracker.TrackProcesses);
+                                                    _OffspringCohortAbundance, Math.Exp(gridCellCohorts[actingCohort].LogOptimalPreyBodySizeRatio),
+                                                    (ushort)currentTimestep, gridCellCohorts[actingCohort].ProportionTimeActive, ref partial.NextCohortIDThreadLocked,TrophicIndex, tracker.TrackProcesses);
                 
                 // Add the offspring cohort to the grid cell cohorts array
                 gridCellCohorts[actingCohort[0]].Add(OffspringCohort);
 
                 // If track processes has been specified then add the new cohort to the process tracker 
                 if (tracker.TrackProcesses)
-                    tracker.RecordNewCohort((uint)cellEnvironment["LatIndex"][0],  (uint)cellEnvironment["LonIndex"][0],
+                    tracker.RecordNewCohort((uint)cellEnvironment["LatIndex"][0],  (uint)cellEnvironment["LonIndex"][0], 
                         currentTimestep, _OffspringCohortAbundance, gridCellCohorts[actingCohort].AdultMass, gridCellCohorts[actingCohort].FunctionalGroupIndex,
                         gridCellCohorts[actingCohort].CohortID, (uint)partial.NextCohortIDThreadLocked);
 
@@ -240,12 +234,8 @@ namespace Madingley
             // Loop over all items in the biomass deltas
             foreach (var Biomass in deltas["biomass"])
             {
-                if (Biomass.Key != "respiring biomass")  
-                {  
-                    // Add the delta biomass to net biomass  
-                    NetBiomassFromOtherEcologicalFunctionsThisTimeStep += Biomass.Value;  
-                }  
-
+                // Add the delta biomass to net biomass
+                NetBiomassFromOtherEcologicalFunctionsThisTimeStep += Biomass.Value;
             }
 
             // If individual body mass after the addition of the net biomass from processes this time step will yield a body mass 

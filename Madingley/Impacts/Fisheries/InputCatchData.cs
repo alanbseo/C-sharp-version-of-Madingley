@@ -214,7 +214,6 @@ namespace Madingley
                 //Need to convert to size bins
                 mb = AssignCatchToMassBin(taxa_ht[i]);
 
-                //*1E6 to convert from tonnes to grams
                 _CatchTotal[Index[0], Index[1]] += catchRate_ht[i] * 1E6;
                 _CatchBinned[Index[0], Index[1], mb] += catchRate_ht[i] * 1E6;
 

@@ -286,26 +286,6 @@ namespace Madingley
 
         }
 
-
-
-        public double CalculateBiomassWeightedSystemMetabolism(ModelGrid ecosystemModelGrid, List<uint[]> cellIndices, int cellIndex) 
-        { 
-
-  
-            double MetabolicLoss = 0.0; 
-            double TotalBiomass = 0.0; 
-
-  
-            // Retrieve the metabolic loss this timestep 
-            bool varExists; 
-            MetabolicLoss = ecosystemModelGrid.GetEnviroLayer("Respiratory CO2 Pool Per Timestep", 0, cellIndices[cellIndex][0], cellIndices[cellIndex][1], out varExists);
-            TotalBiomass = ecosystemModelGrid.GetEnviroLayer("Respiring Biomass Pool Per Timestep", 0, cellIndices[cellIndex][0], cellIndices[cellIndex][1], out varExists); 
- 
-            return MetabolicLoss / TotalBiomass; 
-        } 
-
-
-
         /// <summary>
         /// Calculates the arithmetic community weighted mean body mass
         /// </summary>

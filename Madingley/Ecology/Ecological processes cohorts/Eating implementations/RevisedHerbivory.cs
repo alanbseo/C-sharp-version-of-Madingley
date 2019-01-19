@@ -131,19 +131,6 @@ namespace Madingley
         double InstantFractionEaten;
 
 
-
-        private double _AttackRateActivationEnergy;
-        public double AttackRateActivationEnergy { get { return _AttackRateActivationEnergy; } }
-
-        private double _HandlingTimeActivationEnergy;
-        public double HandlingTimeActivationEnergy { get { return _HandlingTimeActivationEnergy; } }
-
-        private double _ReferenceTemperature;
-        public double ReferenceTemperature { get { return _ReferenceTemperature; } }
-
-        private double _BoltzmannConstant;
-        public double BoltzmannConstant { get { return _BoltzmannConstant; } }
-
         public void InitialiseParametersHerbivory()
         {
             _TimeUnitImplementation =
@@ -157,11 +144,6 @@ namespace Madingley
             _AttackRateExponentTerrestrial = EcologicalParameters.Parameters["Herbivory.RevisedHerbivory.Terrestrial.AttackRateExponent"];
             _AttackRateExponentMarine = EcologicalParameters.Parameters["Herbivory.RevisedHerbivory.Marine.AttackRateExponent"];
             _ReferenceMass = EcologicalParameters.Parameters["Herbivory.RevisedHerbivory.HandlingTimeReferenceMass"];
-
-            _AttackRateActivationEnergy = EcologicalParameters.Parameters["Feeding.TemperatureDependence.AttackRateActivationEnergy"];
-            _HandlingTimeActivationEnergy = EcologicalParameters.Parameters["Feeding.TemperatureDependence.HandlingTimeActivationEnergy"];
-            _ReferenceTemperature = EcologicalParameters.Parameters["Feeding.TemperatureDependence.ReferenceTemperature"];
-            _BoltzmannConstant = EcologicalParameters.Parameters["BoltzmannConstant"];
         }
 
 
@@ -183,10 +165,6 @@ namespace Madingley
             sw.WriteLine("Herbivory\t_AttackRateExponentTerrestrial\t" + Convert.ToString(HerbivoryRateMassExponent));
             sw.WriteLine("Herbivory\t_AttackRateExponentMarine\t" + Convert.ToString(HerbivoryRateMassExponent));
             sw.WriteLine("Herbivory\tHerbivoryRateMassExponent\t" + Convert.ToString(HerbivoryRateMassExponent));
-            sw.WriteLine("Herbivory\tAttackRateActivationEnergy\t" + Convert.ToString(_AttackRateActivationEnergy));
-            sw.WriteLine("Herbivory\tHandlingTimeActivationEnergy\t" + Convert.ToString(_HandlingTimeActivationEnergy));
-            sw.WriteLine("Herbivory\tReferenceTemperature\t" + Convert.ToString(_ReferenceTemperature));
-            sw.WriteLine("Herbivory\tBoltzmannConstant\t" + Convert.ToString(_BoltzmannConstant));
         }
 
 

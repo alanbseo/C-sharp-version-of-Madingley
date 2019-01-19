@@ -184,7 +184,7 @@ namespace Madingley
         /// <param name="functionalGroup">The functional group that the parent and offspring cohorts belong to</param>
         /// <param name="parentCohortIDs">All cohort IDs associated with the acting parent cohort</param>
         /// <param name="offspringCohortID">The cohort ID that has been assigned to the produced offspring cohort</param>
-        public void RecordNewCohort(uint latIndex, uint lonIndex, uint timestep, double offspringCohortAbundance,
+        public void RecordNewCohort(uint latIndex, uint lonIndex, uint timestep, double offspringCohortAbundance, 
             double parentCohortAdultMass, int functionalGroup, List<uint> parentCohortIDs, uint offspringCohortID)
         {
             _TrackReproduction.RecordNewCohort(latIndex, lonIndex, timestep, offspringCohortAbundance, parentCohortAdultMass, 

@@ -187,18 +187,6 @@ namespace Madingley
         /// </summary>
         public double KillRateConstantMassExponent { get { return _KillRateConstantMassExponent; } }
 
-        private double _AttackRateActivationEnergy;
-        public double AttackRateActivationEnergy { get { return _AttackRateActivationEnergy; } }
-
-        private double _HandlingTimeActivationEnergy;
-        public double HandlingTimeActivationEnergy { get { return _HandlingTimeActivationEnergy; } }
-
-        private double _ReferenceTemperature;
-        public double ReferenceTemperature { get { return _ReferenceTemperature; } }
-
-        private double _BoltzmannConstant;
-        public double BoltzmannConstant { get { return _BoltzmannConstant; } }
-
 
         public void InitialiseParametersPredation()
         {
@@ -213,10 +201,6 @@ namespace Madingley
             _KillRateConstantMassExponent = EcologicalParameters.Parameters["Predation.RevisedPredation.KillRateConstantMassExponent"];
             _FeedingPreferenceStandardDeviation = EcologicalParameters.Parameters["Predation.RevisedPredation.FeedingPreferenceStandardDeviation"];
             NumberOfBins = (int)EcologicalParameters.Parameters["Predation.RevisedPredation.NumberOfMassAggregationBins"];
-            _AttackRateActivationEnergy = EcologicalParameters.Parameters["Feeding.TemperatureDependence.AttackRateActivationEnergy"];
-            _HandlingTimeActivationEnergy = EcologicalParameters.Parameters["Feeding.TemperatureDependence.HandlingTimeActivationEnergy"];
-            _ReferenceTemperature = EcologicalParameters.Parameters["Feeding.TemperatureDependence.ReferenceTemperature"];
-            _BoltzmannConstant = EcologicalParameters.Parameters["BoltzmannConstant"];
         }
 
 
@@ -236,10 +220,6 @@ namespace Madingley
             sw.WriteLine("Predation\tKillRateConstant\t" + Convert.ToString(_KillRateConstant));
             sw.WriteLine("Predation\tFeedingPreferenceStandardDeviation\t" + Convert.ToString(_FeedingPreferenceStandardDeviation));
             sw.WriteLine("Predation\tKillRateConstantMassExponent\t" + Convert.ToString(_KillRateConstantMassExponent));
-            sw.WriteLine("Predation\tAttackRateActivationEnergy\t" + Convert.ToString(_AttackRateActivationEnergy));
-            sw.WriteLine("Predation\tHandlingTimeActivationEnergy\t" + Convert.ToString(_HandlingTimeActivationEnergy));
-            sw.WriteLine("Predation\tReferenceTemperature\t" + Convert.ToString(_ReferenceTemperature));
-            sw.WriteLine("Predation\tBoltzmannConstant\t" + Convert.ToString(_BoltzmannConstant));
 
         }
 
@@ -257,17 +237,16 @@ namespace Madingley
         /// <param name="predatorIsOmnivore">Whether the predator cohort is an omnivore cohort</param>
         /// <param name="logOptimalPreyPredatorMassRatio">The log ratio of optimal prey body mass to predator body mass</param>
         /// <returns>The potential number of individuals in a prey cohort eaten by an acting predator cohort</returns>
-        private double CalculateExpectedNumberKilledTerrestrial(double preyAbundance, double preyIndividualMass, 
+        private double CalculateExpectedNumberKilledTerrestrial(double preyAbundance, double preyIndividualMass, int preyMassBinNumber, 
             int preyFunctionalGroup, double predatorIndividualMass, Boolean preyIsCarnivore, Boolean preyIsOmnivore, Boolean predatorIsOmnivore, 
             double logOptimalPreyPredatorMassRatio)
             
     {
             // Calculate the killing rate of an individual predator per unit prey density per hectare per time unit
-            Alphaij = CalculateIndividualKillingRatePerHectare(preyIndividualMass, preyFunctionalGroup, predatorIndividualMass, logOptimalPreyPredatorMassRatio);
+        Alphaij = CalculateIndividualKillingRatePerHectare(preyIndividualMass, preyMassBinNumber, preyFunctionalGroup, predatorIndividualMass, logOptimalPreyPredatorMassRatio);
                         
             // Calculate the potential number of prey killed given the number of prey detections
-            //return Alphaij * Math.Pow(preyAbundance / _CellAreaHectares,2.0);
-            return Alphaij * Math.Pow(preyAbundance / _CellAreaHectares, 2.0);
+            return Alphaij * preyAbundance / _CellAreaHectares;
         }
 
         /// <summary>
@@ -283,15 +262,15 @@ namespace Madingley
         /// <param name="predatorIsOmnivore">Whether the predator cohort is am omnivore cohort</param>
         /// <param name="logOptimalPreyPredatorMassRatio">The log ratio of optimal prey body mass to predator body mass</param>
         /// <returns>The potential number of individuals in a prey cohort eaten by an acting predator cohort</returns>
-        private double CalculateExpectedNumberKilledMarine(double preyAbundance, double preyIndividualMass, 
+        private double CalculateExpectedNumberKilledMarine(double preyAbundance, double preyIndividualMass, int preyMassBinNumber, 
             int preyFunctionalGroup, double predatorIndividualMass, Boolean preyIsCarnivore, Boolean preyIsOmnivore, Boolean predatorIsOmnivore,
             double logOptimalPreyPredatorMassRatio)
         {
             // Calculate the killing rate of an individual predator per unit prey density per hectare per time unit
-            Alphaij = CalculateIndividualKillingRatePerHectare(preyIndividualMass, preyFunctionalGroup, predatorIndividualMass, logOptimalPreyPredatorMassRatio);
+            Alphaij = CalculateIndividualKillingRatePerHectare(preyIndividualMass, preyMassBinNumber, preyFunctionalGroup, predatorIndividualMass, logOptimalPreyPredatorMassRatio);
             
             // Calculate the potential number of prey killed given the number of prey detections
-            return Alphaij * Math.Pow(preyAbundance / _CellAreaHectares,2.0);
+            return Alphaij * preyAbundance / _CellAreaHectares;
         }
 
         // Original
@@ -304,7 +283,7 @@ namespace Madingley
         /// <param name="predatorIndividualMass">The body mass of individuals in the predator cohort</param>
         /// <param name="logOptimalPreyPredatorMassRatio">The log ratio of optimal prey body mass to predator body mass</param>
         /// <returns>The killing rate of an individual predator per unit prey density per hectare per time unit</returns>
-        private double CalculateIndividualKillingRatePerHectare(double preyIndividualMass, int preyFunctionalGroup, 
+        private double CalculateIndividualKillingRatePerHectare(double preyIndividualMass, int preyMassBinNumber, int preyFunctionalGroup, 
             double predatorIndividualMass, double logOptimalPreyPredatorMassRatio)
         {
             //int PreyBinNumber;
@@ -316,7 +295,7 @@ namespace Madingley
                     _FeedingPreferenceStandardDeviation), 2)));
 
             // Calculate the individual killing rate
-            return _SpecificPredatorKillRateConstant * RelativeFeedingPreference;// *BinnedPreyDensities[preyFunctionalGroup, preyMassBinNumber];
+            return _SpecificPredatorKillRateConstant * RelativeFeedingPreference * BinnedPreyDensities[preyFunctionalGroup, preyMassBinNumber];
         }     
 
         /// <summary>

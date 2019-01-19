@@ -133,18 +133,6 @@ namespace Madingley
         }
 
         /// <summary>
-        /// Whether this cohort has been merged with another cohort this time step
-        /// </summary>
-        /// 
-        private Boolean _MergedThisTimeStep;
-
-        public Boolean MergedThisTimeStep
-        {
-            get { return _MergedThisTimeStep; }
-            set { _MergedThisTimeStep = value; }
-        }
-
-        /// <summary>
         /// The proportion of the timestep for which this cohort is active
         /// </summary>
         private double _ProportionTimeActive;
@@ -183,24 +171,6 @@ namespace Madingley
             get { return _LogOptimalPreyBodySizeRatio ; }
             set { _LogOptimalPreyBodySizeRatio = value; }
         }
-
-
-        /// <summary>
-        /// Stores the timestep to which time dependent cohort properties relate.
-        /// </summary>
-        private uint _BaseTimestepBirth;
-        public uint BaseTimestepBirth
-        {
-            get { return _BaseTimestepBirth; }
-            set { _BaseTimestepBirth = value; }
-        }
-
-        private uint _BaseTimestepMaturity;
-        public uint BaseTimestepMaturity
-        {
-            get { return _BaseTimestepMaturity; }
-            set { _BaseTimestepMaturity = value; }
-        }
         
 
         /// <summary>
@@ -218,7 +188,7 @@ namespace Madingley
         /// <param name="trophicIndex">The trophic level index of the cohort</param>
         /// <param name="tracking">Whether the process tracker is enabled</param>
         public Cohort(byte functionalGroupIndex, double juvenileBodyMass, double adultBodyMass, double initialBodyMass, 
-            double initialAbundance, double reproductivePotentialBodyMass, double optimalPreyBodySizeRatio, uint birthTimeStep, double proportionTimeActive, ref Int64 nextCohortID,
+            double initialAbundance, double optimalPreyBodySizeRatio, ushort birthTimeStep, double proportionTimeActive, ref Int64 nextCohortID,
             double trophicIndex, Boolean tracking)
         {
             _FunctionalGroupIndex = functionalGroupIndex;
@@ -227,10 +197,7 @@ namespace Madingley
             _IndividualBodyMass = initialBodyMass;
             _CohortAbundance = initialAbundance;
             _BirthTimeStep = birthTimeStep;
-            _IndividualReproductivePotentialMass = reproductivePotentialBodyMass;
             _MaturityTimeStep = uint.MaxValue;
-            _BaseTimestepBirth = 0;
-            _BaseTimestepMaturity = 0;
             _LogOptimalPreyBodySizeRatio = Math.Log(optimalPreyBodySizeRatio);
             _MaximumAchievedBodyMass = juvenileBodyMass;
             _Merged = false;
@@ -240,29 +207,6 @@ namespace Madingley
             nextCohortID++;
         }
 
-        public Cohort(byte functionalGroupIndex, double juvenileBodyMass, double adultBodyMass, double initialBodyMass,
-    double initialAbundance, double reproductivePotentialBodyMass, double optimalPreyBodySizeRatio, double maxBM, uint birthTimeStep, uint maturityTimeStep, 
-            double proportionTimeActive, ref Int64 nextCohortID,
-            double trophicIndex, Boolean tracking, uint timestep)
-        {
-            _FunctionalGroupIndex = functionalGroupIndex;
-            _JuvenileMass = juvenileBodyMass;
-            _AdultMass = adultBodyMass;
-            _IndividualBodyMass = initialBodyMass;
-            _CohortAbundance = initialAbundance;
-            _BirthTimeStep = birthTimeStep;
-            _BaseTimestepBirth = timestep;
-            _IndividualReproductivePotentialMass = reproductivePotentialBodyMass;
-            _MaturityTimeStep = maturityTimeStep;
-            _BaseTimestepMaturity = (_MaturityTimeStep == uint.MaxValue) ? 0 : timestep;
-            _LogOptimalPreyBodySizeRatio = optimalPreyBodySizeRatio;
-            _MaximumAchievedBodyMass = maxBM;
-            _Merged = false;
-            _TrophicIndex = trophicIndex;
-            _ProportionTimeActive = proportionTimeActive;
-            if (tracking) _CohortID.Add(Convert.ToUInt32(nextCohortID));
-            nextCohortID++;
-        }
 
         public Cohort(Cohort c)
         {
@@ -270,12 +214,9 @@ namespace Madingley
             _JuvenileMass = c._JuvenileMass;
             _AdultMass = c._AdultMass;
             _IndividualBodyMass = c._IndividualBodyMass;
-            _IndividualReproductivePotentialMass = c._IndividualReproductivePotentialMass;
             _CohortAbundance = c._CohortAbundance;
             _BirthTimeStep = c._BirthTimeStep;
-            _BaseTimestepBirth = c._BaseTimestepBirth;
             _MaturityTimeStep = c._MaturityTimeStep;
-            _BaseTimestepMaturity = c._BaseTimestepMaturity;
             _LogOptimalPreyBodySizeRatio = c._LogOptimalPreyBodySizeRatio;
             _MaximumAchievedBodyMass = c._MaximumAchievedBodyMass;
             _Merged = c._Merged;

@@ -135,12 +135,12 @@ namespace Madingley
                     //If ectotherm then use realm specific function
                     if (Realm == 1.0)
                     {
-                        actingCohort.ProportionTimeActive = CalculateProportionTimeSuitableTerrestrial(cellEnvironment, currentTimestep, Endotherm) *
+                        actingCohort.ProportionTimeActive = CalculateProportionTimeSuitableTerrestrial(cellEnvironment, currentMonth, Endotherm) *
                             madingleyCohortDefinitions.GetBiologicalPropertyOneFunctionalGroup("proportion suitable time active", actingCohort.FunctionalGroupIndex);
                     }
                     else
                     {
-                        actingCohort.ProportionTimeActive = CalculateProportionTimeSuitableMarine(cellEnvironment, currentTimestep, Endotherm) *
+                        actingCohort.ProportionTimeActive = CalculateProportionTimeSuitableMarine(cellEnvironment, currentMonth, Endotherm) *
                             madingleyCohortDefinitions.GetBiologicalPropertyOneFunctionalGroup("proportion suitable time active", actingCohort.FunctionalGroupIndex);
                     }
 
@@ -161,19 +161,19 @@ namespace Madingley
         /// <param name="currentMonth">Currnent month in the model</param>
         /// <param name="endotherm">Boolean indicating if cohort is endotherm or ectotherm (true if endotherm)</param>
         /// <returns>The proportion of the timestep for which this cohort could be active</returns>
-        private double CalculateProportionTimeSuitableTerrestrial(SortedList<string, double[]> cellEnvironment, uint currentTimestep, Boolean endotherm)
+        private double CalculateProportionTimeSuitableTerrestrial(SortedList<string, double[]> cellEnvironment, uint currentMonth, Boolean endotherm)
         {
 
 
-            AmbientTemp = cellEnvironment["Temperature"][currentTimestep];
-            DTR = cellEnvironment["DiurnalTemperatureRange"][currentTimestep];
+                AmbientTemp = cellEnvironment["Temperature"][currentMonth];
+                DTR = cellEnvironment["DiurnalTemperatureRange"][currentMonth];
 
                 //Calculate the Warming tolerance and thermal safety margin given standard deviation of monthly temperature
-            WarmingTolerance = TerrestrialWarmingToleranceSlope * cellEnvironment["SDTemperature"][currentTimestep] + TerrestrialWarmingToleranceIntercept;
-            ThermalSafetyMargin = TerrestrialTSMSlope * cellEnvironment["SDTemperature"][currentTimestep] + TerrestrialTSMIntercept;
+                WarmingTolerance = TerrestrialWarmingToleranceSlope * cellEnvironment["SDTemperature"][0] + TerrestrialWarmingToleranceIntercept;
+                ThermalSafetyMargin = TerrestrialTSMSlope * cellEnvironment["SDTemperature"][0] + TerrestrialTSMIntercept;
 
-            Topt = ThermalSafetyMargin + cellEnvironment["AnnualTemperature"][currentTimestep];
-            CTmax = WarmingTolerance + cellEnvironment["AnnualTemperature"][currentTimestep];
+                Topt = ThermalSafetyMargin + cellEnvironment["AnnualTemperature"][0];
+                CTmax = WarmingTolerance + cellEnvironment["AnnualTemperature"][0];
 
 
                 double PerformanceStandardDeviation = (CTmax - Topt) / 12;
@@ -195,7 +195,7 @@ namespace Madingley
         /// <param name="currentMonth">Currnent month in the model</param>
         /// <param name="endotherm">Boolean indicating if cohort is endotherm or ectotherm (true if endotherm)</param>
         /// <returns>The proportion of the timestep for which this cohort could be active</returns>
-        private double CalculateProportionTimeSuitableMarine(SortedList<string, double[]> cellEnvironment, uint currentTimestep, Boolean endotherm)
+        private double CalculateProportionTimeSuitableMarine(SortedList<string, double[]> cellEnvironment, uint currentMonth, Boolean endotherm)
         {
 
             return 1.0;

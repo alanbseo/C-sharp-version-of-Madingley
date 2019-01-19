@@ -67,14 +67,9 @@ namespace Madingley
             deltas, FunctionalGroupDefinitions madingleyCohortDefinitions, FunctionalGroupDefinitions madingleyStockDefinitions, 
             uint currentTimestep, uint currentMonth)
         {
-
-            // Add in the total biomass which is respiring to the appropriate delta  
-            deltas["biomass"]["respiring biomass"] += gridCellCohorts[actingCohort].IndividualBodyMass * gridCellCohorts[actingCohort].CohortAbundance;  
-
-
             // Calculate metabolic loss for an individual and add the value to the delta biomass for metabolism
             deltas["biomass"]["metabolism"] = -CalculateIndividualMetabolicRate(gridCellCohorts[actingCohort].IndividualBodyMass,
-                cellEnvironment["Temperature"][currentTimestep] + _TemperatureUnitsConvert) * _DeltaT;
+                cellEnvironment["Temperature"][currentMonth] + _TemperatureUnitsConvert) * _DeltaT;
 
             // If metabolic loss is greater than individual body mass after herbivory and predation, then set equal to individual body mass
             deltas["biomass"]["metabolism"] = Math.Max(deltas["biomass"]["metabolism"],-(gridCellCohorts[actingCohort].IndividualBodyMass + deltas["biomass"]["predation"] + deltas["biomass"]["herbivory"]));

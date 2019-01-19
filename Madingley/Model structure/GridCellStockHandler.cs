@@ -109,16 +109,6 @@ namespace Madingley
             throw new NotImplementedException();
         }
 
-
-        /// <summary>
-        /// NOT CURRENTLY USED
-        /// </summary>
-        /// <param name="item">NOT CURRENTLY USED</param>
-        public void Add(int fg, Stock item)
-        {
-            GridCellStocks[fg].Add(item);
-        }
-
         /// <summary>
         /// NOT CURRENTLY USED
         /// </summary>

@@ -35,13 +35,13 @@ namespace Madingley
         /// <param name="Precipitation">Mean monthly precipitation (mm)</param>
         /// <param name="MonthlyTemperatures">Mean monthly temperatures, degrees celcius</param>
         /// <returns>A Tuple containing i) monthly actual evapotranspiration (mm), ii) soil water deficit (mm) and, iii) fire season length (between 0 and 360 days) </returns>
-        public Tuple<double[], double[], double[]> MonthlyActualEvapotranspirationSoilMoisture(double AvailableWaterCapacity, double[] Precipitation, double[] MonthlyTemperatures)
+        public Tuple<double[], double, double> MonthlyActualEvapotranspirationSoilMoisture(double AvailableWaterCapacity, double[] Precipitation, double[] MonthlyTemperatures)
         {
             // Vector to hold potential evapotranspiration data
-            double[] PotentialEvapotranspiration = new double[MonthlyTemperatures.Length];
+            double[] PotentialEvapotranspiration = new double[12];
 
             // Loop over months and calculate actual evapotranspiration
-            for (int i = 0; i < MonthlyTemperatures.Length; i++)
+            for (int i = 0; i < 12; i++)
             {
                 PotentialEvapotranspiration[i] = this.CalculatePotentialEvapotranspiration(MonthlyTemperatures[i]);
             }
@@ -50,17 +50,16 @@ namespace Madingley
             // soil water dynamics, which in testing has been long enough for the annual soil water dynamics to 
             // settle on an equilibrium cycle.
             int RunYears = 10; //Number of years to simulate
-            int nyears = (int)Math.Floor(MonthlyTemperatures.Length / 12.0);
             double SoilWaterPast = AvailableWaterCapacity; // Initialise the past soil water content to be field capacity
-            double[] ActualEvapotranspiration = new double[MonthlyTemperatures.Length]; // Will store monthly actual avapotranspiration (mm)
-            double[] SoilWater = new double[MonthlyTemperatures.Length]; // Will store montly soil water
+            double[] ActualEvapotranspiration = new double[12]; // Will store monthly actual avapotranspiration (mm)
+            double[] SoilWater = new double[12]; // Will store montly soil water
             double[] DailyAET = new double[30]; // Temporary store for daily actual evapotranspiration
             double[] DailySWC = new double[30]; // Temporary store for daily soil water content
-            double[] MidMonthDailyPET = new double[MonthlyTemperatures.Length]; // The daily PET at the middle of each month
-            double[] MidMonthDailyPPT = new double[MonthlyTemperatures.Length]; // The daily PPT at the middle of each month
+            double[] MidMonthDailyPET = new double[12]; // The daily PET at the middle of each month
+            double[] MidMonthDailyPPT = new double[12]; // The daily PPT at the middle of each month
             double SoilMoistureFireThreshold = 0.3;
 
-            for (int jj = 0; jj < MonthlyTemperatures.Length; jj++) // for each month work out the mid point values for PPT and PET
+            for (int jj = 0; jj < 12; jj++) // for each month work out the mid point values for PPT and PET
             {
                 MidMonthDailyPET[jj] = PotentialEvapotranspiration[jj] / 30; // Approximating 30 days per month
                 MidMonthDailyPPT[jj] = Precipitation[jj] / 30; // Approximating 30 days per month
@@ -72,10 +71,8 @@ namespace Madingley
             double PPT = 0; // tracks the dail predicipitation rate (mm day-1)
             double TMP = 0;
 
-            double[] LengthOfFireSeason = new double[MonthlyTemperatures.Length]; // The length of the fire season is the fraction of the year that the soil moisture status is below a critical value: indicative of fire risk
-            double TempLengthOfFireSeason = 0;
+            double LengthOfFireSeason = 0; // The length of the fire season is the fraction of the year that the soil moisture status is below a critical value: indicative of fire risk
 
-            //Equilibriate with the environment of the first year of data
             for (int ii = 0; ii < RunYears; ii++) // for each of the simulated years
             {
                 for (int jj = 0; jj < 12; jj++) // for each month
@@ -99,63 +96,30 @@ namespace Madingley
                         DailySWC[kk] = Math.Min(Math.Max((SoilWaterPast + PPT - DailyAET[kk]), 0), AvailableWaterCapacity); //Soil water content is then updated
                         SoilWaterPast = DailySWC[kk]; // update the previous soil water content
                     } // end of day loop
-                }
-            }
-
-            for (int ii = 0; ii < nyears; ii++) // for each of the timeseries years
-            {
-                for (int jj = (ii*12); jj < (ii+1)*12; jj++) // for each month
-                {
-                    PrevMonth = (jj == 0) ? 11 : jj - 1; // work out the index of the previous month
-                    NextMonth = (jj == MonthlyTemperatures.Length-1) ? (ii*12) : jj + 1; // work out the index of the next month  
-
-                    for (int kk = 0; kk < 30; kk++) // for each day in the month
+                    if (ii == (RunYears - 1)) // if we are in the last year of simulation then we also want to record the monthly values
                     {
-                        if (kk < 15) // if we are less than half way through the month then linearly interpolate from the previous month
+                        for (int kk = 0; kk < 30; kk++) // for each day in the month
                         {
-                            PET = MidMonthDailyPET[PrevMonth] + ((MidMonthDailyPET[jj] - MidMonthDailyPET[PrevMonth]) / (double)15) * (double)kk; //basically divide the difference by fifteen steps and multiply by the number of steps forward
-                            PPT = MidMonthDailyPPT[PrevMonth] + ((MidMonthDailyPPT[jj] - MidMonthDailyPPT[PrevMonth]) / (double)15) * (double)kk;
-                        }
-                        else // if we are more than half way through the month then linearly interpolate forwards
-                        {
-                            PET = MidMonthDailyPET[jj] + ((MidMonthDailyPET[NextMonth] - MidMonthDailyPET[jj]) / (double)15) * (double)(kk - 15);
-                            PPT = MidMonthDailyPPT[jj] + ((MidMonthDailyPPT[NextMonth] - MidMonthDailyPPT[jj]) / (double)15) * (double)(kk - 15);
-                        }
-                        DailyAET[kk] = PET * (SoilWaterPast / AvailableWaterCapacity); // this is the potential evapotranspiration rates scaled by how dry the soil is. The further the soil water is from field capacity the less the evapotranspiration rate is.
-                        DailySWC[kk] = Math.Min(Math.Max((SoilWaterPast + PPT - DailyAET[kk]), 0), AvailableWaterCapacity); //Soil water content is then updated
-                        SoilWaterPast = DailySWC[kk]; // update the previous soil water content
-                    } // end of day loop
-
-                    
-                    for (int kk = 0; kk < 30; kk++) // for each day in the month
-                    {
-                        if (kk < 15) // if we are less than half way through the month then linearly interpolate from the previous month
-                        {
-                            TMP = MonthlyTemperatures[PrevMonth] + ((MonthlyTemperatures[jj] - MonthlyTemperatures[PrevMonth]) / (double)15) * (double)kk;
-                        }
-                        else // if we are more than half way through the month then linearly interpolate forwards
-                        {
-                            TMP = MonthlyTemperatures[jj] + ((MonthlyTemperatures[NextMonth] - MonthlyTemperatures[jj]) / (double)15) * (double)(kk - 15);
-                        }
-                        ActualEvapotranspiration[jj] += DailyAET[kk]; // Add up the actual evapotranspiration
-                        SoilWater[jj] += DailySWC[kk]; // Add up the soil water contents (we'll take an average)
-                        double SoilMoistureContent = DailySWC[kk] / AvailableWaterCapacity;
-                        if (TMP > 0 && SoilMoistureContent < SoilMoistureFireThreshold)
-                        {
-                            TempLengthOfFireSeason += (Math.Exp((-Math.PI) * Math.Pow(((DailySWC[kk] / AvailableWaterCapacity) / 0.3), 2))); // work out the length of the fire season
+                            if (kk < 15) // if we are less than half way through the month then linearly interpolate from the previous month
+                            {
+                                TMP = MonthlyTemperatures[PrevMonth] + ((MonthlyTemperatures[jj] - MonthlyTemperatures[PrevMonth]) / (double)15) * (double)kk;
+                            }
+                            else // if we are more than half way through the month then linearly interpolate forwards
+                            {
+                                TMP = MonthlyTemperatures[jj] + ((MonthlyTemperatures[NextMonth] - MonthlyTemperatures[jj]) / (double)15) * (double)(kk - 15);
+                            }
+                            ActualEvapotranspiration[jj] += DailyAET[kk]; // Add up the actual evapotranspiration
+                            SoilWater[jj] += DailySWC[kk]; // Add up the soil water contents (we'll take an average)
+                            double SoilMoistureContent = DailySWC[kk] / AvailableWaterCapacity;
+                            if (TMP > 0 && SoilMoistureContent < SoilMoistureFireThreshold)
+                            {
+                                LengthOfFireSeason += (Math.Exp((-Math.PI) * Math.Pow(((DailySWC[kk] / AvailableWaterCapacity) / 0.3), 2))); // work out the length of the fire season
+                            }
                         }
                     }
-                    
                 }
-
-                for (int jj = (ii * 12); jj < (ii + 1) * 12; jj++) // for each month
-                {
-                    LengthOfFireSeason[jj] = TempLengthOfFireSeason/360;
-                }
-
             }
-                
-            var OutputData = new Tuple<double[], double[], double[]>(ActualEvapotranspiration, SoilWater, LengthOfFireSeason); // return the collection of results
+            var OutputData = new Tuple<double[], double, double>(ActualEvapotranspiration, SoilWaterPast, LengthOfFireSeason); // return the collection of results
             return OutputData;
         }
 
@@ -189,55 +153,43 @@ namespace Madingley
         /// <param name="monthlyTemperature">A vector containing average temperatures for each month</param>
         /// <param name="missingValue">The missing value used in the the environmental datasets</param>
         /// <returns>The fraction of the year in which temperature drops below zero at some point in the day</returns>
-        public double[] GetNDF(double[] monthlyFrostDays, double[] monthlyTemperature, double missingValue)
+        public double GetNDF(double[] monthlyFrostDays, double[] monthlyTemperature, double missingValue)
         {
-            double[] DataToReturn = new double[monthlyFrostDays.Length];
-            int nyears = (int)Math.Floor(monthlyFrostDays.Length / 12.0);
-
+            double DataToReturn = 0.0;
 
             if (monthlyFrostDays[0] > missingValue)
             {
-                for (int y = 0; y < nyears; y++)
+                double NumMonthsFrost = 0; // will monitor the integrated number of frost months (a continuous variable)
+                int prevmonth;
+                int nextmonth;
+
+                // We classify a complete "frost month" if we have more than 15 days in the month with frost 
+                for (int jj = 0; jj < 12; jj++)
                 {
-
-                    double NumMonthsFrost = 0; // will monitor the integrated number of frost months (a continuous variable)
-                    int prevmonth;
-                    int nextmonth;
-
+                    prevmonth = (jj == 0) ? 11 : jj - 1;
+                    nextmonth = (jj == 11) ? 0 : jj + 1;
                     // We classify a complete "frost month" if we have more than 15 days in the month with frost 
-                    for (int jj = (y*12); jj < (y+1)*12; jj++)
+                    if (monthlyFrostDays[jj] > 15)
                     {
-                        //If this is the first month in the dataset, use the end of the current year as the previous month
-                        prevmonth = (jj == 0) ? 11 : jj - 1;
-                        //If this is the last month in the dataset, use the start of the current year as the next month
-                        nextmonth = (jj == monthlyFrostDays.Length - 1) ? (y * 12) : jj + 1;
-
-                        // We classify a complete "frost month" if we have more than 15 days in the month with frost 
-                        if (monthlyFrostDays[jj] > 15)
-                        {
-                            NumMonthsFrost++;
-                        }
-                        // However, if there are less than 15 days in the month with frost then we first of all
-                        // work out if that month came from a previous month with more than 15 frost days
-                        // If that is the case then we interpolate forwards and have a fraction of a month that is frost
-                        else if (monthlyFrostDays[prevmonth] > 15)
-                        {
-                            NumMonthsFrost += (double)monthlyFrostDays[jj] / 15;
-
-                        }
-                        // Otherwise if there are more than 15 days frost in the next month then we are going into the winter season
-                        // and we make an interpolation
-                        else if (monthlyFrostDays[nextmonth] > 15)
-                        {
-                            NumMonthsFrost += (double)monthlyFrostDays[jj] / 15;
-                        }
+                        NumMonthsFrost++;
                     }
-
-                    for (int jj = (y * 12); jj < (y + 1) * 12; jj++)
+                    // However, if there are less than 15 days in the month with frost then we first of all
+                    // work out if that month came from a previous month with more than 15 frost days
+                    // If that is the case then we interpolate forwards and have a fraction of a month that is frost
+                    else if (monthlyFrostDays[prevmonth] > 15)
                     {
-                        DataToReturn[jj] = NumMonthsFrost / 12; // convert to a fraction of a year
+                        NumMonthsFrost += (double)monthlyFrostDays[jj] / 15;
+
+                    }
+                    // Otherwise if there are more than 15 days frost in the next month then we are going into the winter season
+                    // and we make an interpolation
+                    else if (monthlyFrostDays[nextmonth] > 15)
+                    {
+                        NumMonthsFrost += (double)monthlyFrostDays[jj] / 15;
                     }
                 }
+
+                    DataToReturn = NumMonthsFrost / 12; // convert to a fraction of a year
             }
             else
             {

@@ -66,11 +66,10 @@ namespace Madingley
             double bodyMassIncludingChangeThisTimeStep, Dictionary<string, Dictionary<string, double>> deltas, uint currentTimestep)
         {
             // Calculate the age (in model time steps) that the cohort reached maturity
-            double TimeToMaturity = (gridCellCohorts[actingCohort].MaturityTimeStep - gridCellCohorts[actingCohort].BaseTimestepMaturity) - 
-                (gridCellCohorts[actingCohort].BirthTimeStep - gridCellCohorts[actingCohort].BaseTimestepBirth);
+            double TimeToMaturity = gridCellCohorts[actingCohort].MaturityTimeStep - gridCellCohorts[actingCohort].BirthTimeStep;
             
             // Calculate how many model time steps since the cohort reached maturity
-            double AgePostMaturity = currentTimestep - (gridCellCohorts[actingCohort].MaturityTimeStep - gridCellCohorts[actingCohort].BaseTimestepMaturity);
+            double AgePostMaturity = currentTimestep - gridCellCohorts[actingCohort].MaturityTimeStep;
             
             // Calculate the time since maturity as a fraction of the time that it took the cohort to reach maturity
             double FractionalAgePostMaturity = AgePostMaturity/(TimeToMaturity+1);

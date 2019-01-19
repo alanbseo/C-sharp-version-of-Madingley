@@ -285,20 +285,6 @@ namespace Madingley
             set { _MaxNumberOfCohorts = value; }
         }
 
-        /// <summary>
-        /// The maximum number of cohorts per grid cell for each functional group
-        /// </summary>
-        /// 
-        private double[] _MaxNumberOfCohortsPerFG;
-
-        /// <summary>
-        ///  Get and set the maximum number of cohorts per functional group
-        /// </summary>
-        public double[] MaxNumberOfCohortsPerFG
-        {
-            get { return _MaxNumberOfCohortsPerFG; }
-            set { _MaxNumberOfCohortsPerFG = value; }
-        }
 
         /// <summary>
         /// Whether to run only dispersal (i.e. turn all other ecological processes off, and set dispersal probability to one temporarily)
@@ -391,6 +377,8 @@ namespace Madingley
             get { return _EnviroStackTemporal; }
             set { _EnviroStackTemporal = value; }
         }
+
+
 
 
         /// <summary>
@@ -598,16 +586,6 @@ namespace Madingley
             set { _ModelStateFilename = value; }
         }
 
-        private List<string> _ModelStateType;
-
-        public List<string> ModelStateType
-        {
-            get { return _ModelStateType; }
-            set { _ModelStateType = value; }
-        }
- 
-
-
         
         /// <summary>
         /// Reads the initalization file to get information for the set of simulations to be run
@@ -625,7 +603,6 @@ namespace Madingley
             // Initialize the lists for storing information about model states
             _ModelStatePath = new List<string>();
             _ModelStateFilename = new List<string>();
-            _ModelStateType = new List<string>();
 
             // Read the intialisation files and copy them to the output directory
             ReadAndCopyInitialisationFiles(simulationInitialisationFilename, definitionsFilename, outputsFilename, outputPath);
@@ -750,7 +727,6 @@ namespace Madingley
                         break;
                     case "maximum number of cohorts":
                         _MaxNumberOfCohorts = Convert.ToInt32(VarValues.GetValue(row));
-                        _MaxNumberOfCohortsPerFG = new double[] { 125, 125, 125, 125, 125, 125, 125, 125, 125, 125, 111, 111, 111, 111, 111, 111, 111, 111, 111 };
                         break;
                     case "read state":
                         if (VarValues.GetValue(row).ToString() != "")
@@ -995,7 +971,7 @@ namespace Madingley
         /// <param name="modelStateFileSpecification">Filename of the setup file specifying the model state datafile</param>
         private void ModelStatesInitialisation(string modelStateFileSpecification, string outputPath)
         {
-
+            
             string FileString = "msds:csv?file=input/Model setup/Initial model state setup/" + modelStateFileSpecification + "&openMode=readOnly";
 
             //Copy the file containing the list of environmental layers to the output directory
@@ -1023,9 +999,6 @@ namespace Madingley
                         break;
                     case "filename":
                         for (int ii = 0; ii < TempValues.Length; ii++) _ModelStateFilename.Add(TempValues.GetValue(ii).ToString());
-                        break;
-                    case "filetype":
-                        for (int ii = 0; ii < TempValues.Length; ii++) _ModelStateType.Add(TempValues.GetValue(ii).ToString());
                         break;
                 }
             }

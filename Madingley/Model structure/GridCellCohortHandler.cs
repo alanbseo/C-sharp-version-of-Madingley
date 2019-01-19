@@ -127,16 +127,9 @@ namespace Madingley
         /// <param name="listOfCohorts">The list of cohorts to add</param>
         public void Add(List<Cohort> listOfCohorts)
         {
-            //Debug.Fail("The model does not currently support the addition of functional groups");
+            Debug.Fail("The model does not currently support the addition of functional groups");
             ((IList<List<Cohort>>)GridCellCohorts).Add(listOfCohorts);
         }
-
-
-        public void Add(int fg, Cohort c)
-        {
-            GridCellCohorts[fg].Add(c);
-        }
-
 
         /// <summary>
         /// Currently not implemented
@@ -225,16 +218,6 @@ namespace Madingley
             return sum;
         }
 
-        public int[] GetNumberOfCohortsPerFG()
-        {
-            int[] tempArray = new int[Convert.ToInt32(GridCellCohorts.Count())];
-            for (var i = 0; i < GridCellCohorts.Count(); i++)
-            {
-                tempArray[i] = GridCellCohorts[i].Count();
-            }
-            return tempArray;
-        }
-
     }
 
     /// <summary>
@@ -278,7 +261,6 @@ namespace Madingley
         {
             position = -1;
         }
-
 
         /// <summary>
         /// Returns the list of cohorts for the current position (i.e. functional group) in the vector of lists of cohorts

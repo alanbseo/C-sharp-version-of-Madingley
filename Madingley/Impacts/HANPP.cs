@@ -12,12 +12,6 @@ namespace Madingley
     /// <remarks>Assumes that autotroph matter is appropriated evenly from different stocks in proportion to their biomass</remarks>
     public class HumanAutotrophMatterAppropriation
     {
-        //Global mean HANPP from harvesting values from Haberl et al. (2007), PNAS
-        double HANPPh_crop = 296;
-        double HANPPh_wilderness = 0.0;
-        double HANPPh_grazing = 41;
-        double HANPPh_forestry = 48;
-        double HANPPh_urban = 63;
 
         UtilityFunctions _Utilities;
 
@@ -47,7 +41,7 @@ namespace Madingley
             Tuple<string, double, double> humanNPPScenario, GridCellStockHandler
             gridCellStocks, int[] actingStock, uint currentTimestep, int scenarioYear, uint burninSteps,
             uint impactSteps, uint recoverySteps, uint instantStep, uint numInstantStep, Boolean impactCell,
-            string globalModelTimestepUnits, FunctionalGroupDefinitions madingleyStockDefinitions, double fracEvergreen)
+            string globalModelTimestepUnits)
         {
 
             double RemovalRate = 0.0;
@@ -76,6 +70,7 @@ namespace Madingley
                         // Get the total amount of NPP appropriated by humans from this cell
                         double HANPP = cellEnvironment["HANPP"][0];
 
+                         
                         // If HANPP value is missing, then assume zero
                         if (HANPP == cellEnvironment["Missing Value"][0]) HANPP = 0.0;
 
@@ -95,7 +90,7 @@ namespace Madingley
                         // Convert gC/m2/month to gC/km2/month
                         HANPP *= m2Tokm2Conversion;
 
-                        // Multiply by cell area (in km2) to get g/cell/month
+                        // Multiply by cell area (in km2) to get g/cell/day
                         HANPP *= cellEnvironment["Cell Area"][0];
 
 
@@ -120,12 +115,21 @@ namespace Madingley
 
                         //if (gridCellStocks[actingStock].TotalBiomass < 0.0) gridCellStocks[actingStock].TotalBiomass = 0.0;
                     }
-                }
-                else if(humanNPPScenario.Item1 == "ssp")
+                } else if (humanNPPScenario.Item1 == "hanppmulti")
                 {
-                    //The scenario year calculation removes the need for this if check and allows the burnin period to have HANPP applied
-                    //if (currentTimestep > burninSteps)
+
+                    if (currentTimestep > burninSteps)
                     {
+                        // Loop over stocks in the grid cell and calculate the total biomass of all stocks
+                        double TotalAutotrophBiomass = 0.0;
+                        foreach (var stockFunctionalGroup in gridCellStocks)
+                        {
+                            for (int i = 0; i < stockFunctionalGroup.Count; i++)
+                            {
+                                TotalAutotrophBiomass += stockFunctionalGroup[i].TotalBiomass;
+                            }
+                        }
+
                         // Get the total amount of NPP appropriated by humans from this cell
                         double HANPPh = cellEnvironment["HANPPharvest"][scenarioYear];
                         double HANPPlc = cellEnvironment["HANPPlc"][scenarioYear];
@@ -136,48 +140,26 @@ namespace Madingley
 
                         HANPPh *= cellEnvironment["Seasonality"][currentTimestep % 12];
                         HANPPlc *= cellEnvironment["Seasonality"][currentTimestep % 12];
-                        
-                        //Allocate HANPP to this stock depending on its definition
-                        
-                        //Allocate HANPP between deciduous and evergreen according to FracEvergreen
-                        if (madingleyStockDefinitions.GetTraitNames("leaf strategy", actingStock[0]).Equals("deciduous"))
-                        {
-                            HANPPlc *= (1.0 -fracEvergreen);
-                            HANPPh *= (1.0 - fracEvergreen);
-                        }
-                        else
-                        {
-                            HANPPlc *= (fracEvergreen);
-                            HANPPh *= (fracEvergreen);
-                        }
-                        //Allocate between impacted and natural using fractional cell area
-                        if (madingleyStockDefinitions.GetTraitNames("impact state",actingStock[0]).Equals("primary"))
-                        {
-                            //No Hanpp from land cover change in natural lands
-                            HANPPlc *= 0.0;
-                            HANPPh *= 0.0;
-                        } else if (madingleyStockDefinitions.GetTraitNames("impact state", actingStock[0]).Equals("secondary"))
-                        {
-                            //No Hanpp from land cover change in natural lands
-                            HANPPlc *= 0.0;
-                            HANPPh *= 1.0 - FracImpactedHANPPh(cellEnvironment["Fsecondary"][scenarioYear], cellEnvironment["Fcropland"][scenarioYear],
-                                cellEnvironment["Furban"][scenarioYear], cellEnvironment["Fgrazing"][scenarioYear]);
-                        }
-                        else
-                        {
-                            //All HANPPlc comes from impacted lands
-                            HANPPh *= (FracImpactedHANPPh(cellEnvironment["Fsecondary"][scenarioYear], cellEnvironment["Fcropland"][scenarioYear],
-                                cellEnvironment["Furban"][scenarioYear], cellEnvironment["Fgrazing"][scenarioYear]));
-                        }
 
                         //Combine harvest and land change terms
                         double HANPP = HANPPh + HANPPlc;
 
+                        // Allocate HANPP for this stock according to the proportion of total autotroph biomass that the stock represents
+                        if (TotalAutotrophBiomass == 0.0)
+                        {
+                            HANPP = 0.0;
+                        }
+                        else
+                        {
+                            HANPP *= (gridCellStocks[actingStock].TotalBiomass / TotalAutotrophBiomass);
+                        }
+
+
                         // Convert gC/m2/month to gC/km2/month
                         HANPP *= m2Tokm2Conversion;
 
-                        // Multiply by cell area (in km2) to get g/cell/month
-                        HANPP *= gridCellStocks[actingStock].FractionalArea * cellEnvironment["Cell Area"][0];
+                        // Multiply by cell area (in km2) to get g/cell/day
+                        HANPP *= cellEnvironment["Cell Area"][0];
 
 
                         // Convert from gC to g dry matter
@@ -196,12 +178,12 @@ namespace Madingley
                         {
                             RemovalRate = Math.Min(1.0, WetMatterAppropriated / wetMatterNPP);
                         }
+                        // Remove human appropriated autotroph biomass from total autotroph biomass
+                        //gridCellStocks[actingStock].TotalBiomass -= WetMatterAppropriated;
 
+                        //if (gridCellStocks[actingStock].TotalBiomass < 0.0) gridCellStocks[actingStock].TotalBiomass = 0.0;
                     }
-
-
-                }
-                else if (humanNPPScenario.Item1 == "no")
+                } else if (humanNPPScenario.Item1 == "no")
                 {
                     // Do not remove any autotroph biomass
                 }
@@ -319,21 +301,9 @@ namespace Madingley
 
             }
 
-            cellEnvironment["RelativeHANPP"][0] = RemovalRate;
             return(RemovalRate);
         }
+        
 
-
-        public double FracImpactedHANPPh(double ffor, double fcrop, double furb, double fgra)
-        {
-            double FracImpHANPPh = (fcrop*HANPPh_crop + furb*HANPPh_urban + fgra*HANPPh_grazing)/
-                (fcrop * HANPPh_crop + furb * HANPPh_urban + fgra * HANPPh_grazing + ffor * HANPPh_forestry);
-
-            //Prevent NaNs arising from division by zero
-            if (double.IsNaN(FracImpHANPPh)) FracImpHANPPh = 0.0;
-
-            return FracImpHANPPh;
-        }
     }
-
 }

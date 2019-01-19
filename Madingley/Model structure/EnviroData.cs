@@ -229,7 +229,7 @@ namespace Madingley
                     break;
             }
 
-            double[, ,] temp = null;
+            double[,,] temp = null;
             _DataArray = new List<double[,]>();
 
             //Fetch for the required data
@@ -361,7 +361,7 @@ namespace Madingley
                 ds.AddAxisCells("longitude", "degrees_east", _Lons[cellList[ii][1]], Lons[cellList[ii][1]] + cellSize, cellSize);
                 ds.AddAxisCells("latitude", "degrees_north", _Lats[cellList[ii][0]], _Lats[cellList[ii][0]] + cellSize, cellSize);
 
-                double[, ,] temp = null;
+                double[,,] temp = null;
 
 
                 //Fetch for the required data
@@ -370,31 +370,31 @@ namespace Madingley
                     case "land_dtr":
                         ds.Fetch(ClimateParameter.FC_LAND_DIURNAL_TEMPERATURE_RANGE, "landdtr", dataSource: FetchClimateDataSource); //this call will create 2D variable on dimensions records and months and fill it with a FetchClimate
                         //int NumberOfRecords = ds.Dimensions["RecordNumber"].Length; // get number of records     
-                        temp = (double[, ,])ds.Variables["landdtr"].GetData();
+                        temp = (double[,,])ds.Variables["landdtr"].GetData();
                         _MissingValue = (double)ds.Variables["landdtr"].GetMissingValue();
                         break;
                     case "temperature":
                         ds.Fetch(ClimateParameter.FC_TEMPERATURE, "airt", dataSource: FetchClimateDataSource); //this call will create 2D variable on dimensions records and months and fill it with a FetchClimate
                         //int NumberOfRecords = ds.Dimensions["RecordNumber"].Length; // get number of records     
-                        temp = (double[, ,])ds.Variables["airt"].GetData();
+                        temp = (double[,,])ds.Variables["airt"].GetData();
                         _MissingValue = (double)ds.Variables["airt"].GetMissingValue();
                         break;
                     // Commenting out ocean air temperature because it is running too slow when using FetchClimate
                     case "temperature_ocean":
                         ds.Fetch(ClimateParameter.FC_OCEAN_AIR_TEMPERATURE, "oceanairt", dataSource: FetchClimateDataSource); //this call will create 2D variable on dimensions records and months and fill it with a FetchClimate
                         //int NumberOfRecords = ds.Dimensions["RecordNumber"].Length; // get number of records     
-                        temp = (double[, ,])ds.Variables["oceanairt"].GetData();
+                        temp = (double[,,])ds.Variables["oceanairt"].GetData();
                         _MissingValue = (double)ds.Variables["oceanairt"].GetMissingValue();
                         break;
                     case "precipitation":
                         ds.Fetch(ClimateParameter.FC_PRECIPITATION, "precip", dataSource: FetchClimateDataSource); //this call will create 2D variable on dimensions records and months and fill it with a FetchClimate
                         //int NumberOfRecords = ds.Dimensions["RecordNumber"].Length; // get number of records     
-                        temp = (double[, ,])ds.Variables["precip"].GetData();
+                        temp = (double[,,])ds.Variables["precip"].GetData();
                         _MissingValue = (double)ds.Variables["precip"].GetMissingValue();
                         break;
                     case "frost":
                         ds.Fetch(ClimateParameter.FC_LAND_FROST_DAY_FREQUENCY, "frost", dataSource: FetchClimateDataSource);
-                        temp = (double[, ,])ds.Variables["frost"].GetData();
+                        temp = (double[,,])ds.Variables["frost"].GetData();
                         _MissingValue = (double)ds.Variables["frost"].GetMissingValue();
                         break;
                     default:
@@ -464,7 +464,7 @@ namespace Madingley
             Int32[] tempInt32Vector;
             Int16[] tempInt16Vector;
 
-            
+
 
             //Integer counter for iterating through search strings
             int kk = 0;
@@ -730,7 +730,7 @@ namespace Madingley
                             {
                                 // Get the number of months in the temporal dimension
                                 _NumTimes = (uint)internalData.Dimensions[YearSearchStrings[kk]].Length;
-                                
+
                                 // Read in the values of the temporal dimension from the file
                                 // Check which format the temporal dimension data are in; if unrecognized, then throw an error
                                 if (internalData.Variables[YearSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "single")
@@ -1564,10 +1564,10 @@ namespace Madingley
 
             double MaxNonMissingValue = 0.0;
 
-           
+
             for (int ii = ClosestLowerLatIndex; ii <= ClosestUpperLatIndex; ii++)
             {
-                    
+
                 for (int jj = closestLeftmostLonIndex; jj <= closestRightmostLonIndex; jj++)
                 {
 
@@ -1582,7 +1582,7 @@ namespace Madingley
                 missingValue = true;
                 MaxNonMissingValue = this.MissingValue;
             }
-            
+
 
             //Return the maximum value
             return MaxNonMissingValue;
@@ -1871,8 +1871,8 @@ namespace Madingley
             if (internalData.Variables[dataName].TypeOfData.Name.ToString().ToLower() == "single")
             {
                 // Read the environmental data into a temporary array
-                Single[, ,] TempArray;
-                TempArray = internalData.GetData<Single[, ,]>(dataName);
+                Single[,,] TempArray;
+                TempArray = internalData.GetData<Single[,,]>(dataName);
 
                 // Revised for speed
                 switch (positions[0])
@@ -2336,8 +2336,8 @@ namespace Madingley
             else if (internalData.Variables[dataName].TypeOfData.Name.ToString().ToLower() == "double")
             {
                 // Read the environmental data into a temporary array
-                double[, ,] TempArray;
-                TempArray = internalData.GetData<double[, ,]>(dataName);
+                double[,,] TempArray;
+                TempArray = internalData.GetData<double[,,]>(dataName);
                 // Revised for speed
                 switch (positions[0])
                 {
@@ -2799,8 +2799,8 @@ namespace Madingley
             else if (internalData.Variables[dataName].TypeOfData.Name.ToString().ToLower() == "int32")
             {
                 // Read the environmental data into a temporary array
-                Int32[, ,] TempArray;
-                TempArray = internalData.GetData<Int32[, ,]>(dataName);
+                Int32[,,] TempArray;
+                TempArray = internalData.GetData<Int32[,,]>(dataName);
                 // Revised for speed
                 switch (positions[0])
                 {
@@ -3263,8 +3263,8 @@ namespace Madingley
             else if (internalData.Variables[dataName].TypeOfData.Name.ToString().ToLower() == "int16")
             {
                 // Read the environmental data into a temporary array
-                Int16[, ,] TempArray;
-                TempArray = internalData.GetData<Int16[, ,]>(dataName);
+                Int16[,,] TempArray;
+                TempArray = internalData.GetData<Int16[,,]>(dataName);
 
                 // Revised for speed
                 switch (positions[0])

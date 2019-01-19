@@ -63,7 +63,7 @@ namespace Madingley
             // Create a threadsafe textwriter to write outputs to the Maturity stream
             SyncStateWriter = TextWriter.Synchronized(StateWriter);
             SyncStateWriter.WriteLine("TimeStep\tLatitude\tLongitude\tID" +
-            "\tFunctionalGroup\tJuvenileMass\tAdultMass\tIndividualBodyMass\tCohortAbundance\tIndividualReproductiveMass\tBirthTimeStep" +
+            "\tFunctionalGroup\tJuvenileMass\tAdultMass\tIndividualBodyMass\tCohortAbundance\tReproductiveMass\tBirthTimeStep" +
                 "\tMaturityTimeStep\tLogOptimalPreyBodySizeRatio\tMaximumAchievedBodyMass\tTrophicIndex\tProportionTimeActive");
 
             Simulation = simulation;
@@ -97,8 +97,8 @@ namespace Madingley
                     {
                         organism = "-999\tS" + Convert.ToString(S.FunctionalGroupIndex) + "\t" +
                                     "-999\t-999\t" + Convert.ToString(S.IndividualBodyMass) + "\t" +
-                                    Convert.ToString(S.TotalBiomass) + "\t" + Convert.ToString(S.FractionalArea) + "\t" +
-                                    "-999\t-999\t-999\t-999\t-999";
+                                    Convert.ToString(S.TotalBiomass) + "\t" +
+                                    "-999\t-999\t-999\t-999\t-999\t-999";
                         SyncStateWriter.WriteLine(context + organism);
                     }
                 }
@@ -175,7 +175,7 @@ namespace Madingley
 
             //Define the cohort properties for output
             string[] CohortProperties = new string[]
-            {"JuvenileMass", "AdultMass", "IndividualBodyMass", "CohortAbundance",
+            {"JuvenileMass", "AdultMass", "IndividualBodyMass","IndividualReproductivePotentialMass", "CohortAbundance",
              "BirthTimeStep", "MaturityTimeStep", "LogOptimalPreyBodySizeRatio",
              "MaximumAchievedBodyMass","Merged","TrophicIndex","ProportionTimeActive"};
 

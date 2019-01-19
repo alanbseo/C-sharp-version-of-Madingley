@@ -255,10 +255,10 @@ namespace Madingley
         /// <param name="tracking">Whether process-tracking is enabled</param>
         /// <param name="DrawRandomly">Whether the model is set to use a random draw</param>
         /// <param name="specificLocations">Whether the model is to be run for specific locations</param>
-        public ModelGrid(float minLat, float minLon,float maxLat,float maxLon,float latCellSize,float lonCellSize,
-            SortedList<string, EnviroData> enviroStack, SortedList<string, EnviroData> enviroStackTemporal, FunctionalGroupDefinitions cohortFunctionalGroups, FunctionalGroupDefinitions
+        public ModelGrid(float minLat, float minLon,float maxLat,float maxLon,float latCellSize,float lonCellSize, 
+            SortedList<string,EnviroData> enviroStack, SortedList<string, EnviroData> enviroStackTemporal, FunctionalGroupDefinitions cohortFunctionalGroups, FunctionalGroupDefinitions
             stockFunctionalGroups, SortedList<string, double> globalDiagnostics, Boolean tracking, Boolean DrawRandomly, 
-            Boolean specificLocations, string globalModelTimeStepUnit)
+            Boolean specificLocations)
         {
             // Add one to the counter of the number of grids. If there is more than one model grid, exit the program with a debug crash.
             NumGrids = NumGrids + 1;
@@ -336,8 +336,8 @@ namespace Madingley
             {
                 for (int jj = 0; jj < _NumLonCells; jj+=GridCellRarefaction)
                 {
-                    InternalGrid[ii, jj] = new GridCell(_Lats[ii],(uint)ii, _Lons[jj],(uint)jj, LatCellSize, LonCellSize, enviroStack,enviroStackTemporal,
-                        GlobalMissingValue, cohortFunctionalGroups, stockFunctionalGroups, globalDiagnostics, tracking, specificLocations,globalModelTimeStepUnit);
+                    InternalGrid[ii, jj] = new GridCell(_Lats[ii],(uint)ii, _Lons[jj],(uint)jj, LatCellSize, LonCellSize, enviroStack, enviroStackTemporal,
+                        GlobalMissingValue, cohortFunctionalGroups, stockFunctionalGroups, globalDiagnostics, tracking, specificLocations);
                     CellsForDispersal[ii,jj] = new List<uint[]>();
                     CellsForDispersalDirection[ii, jj] = new List<uint>();
                     Console.Write("\rRow {0} of {1}", ii+1, NumLatCells/GridCellRarefaction);
@@ -347,7 +347,7 @@ namespace Madingley
             Console.WriteLine("");
 
 
-            InterpolateMissingValues(globalModelTimeStepUnit);
+            InterpolateMissingValues();
 
 
             // Fill in the array of dispersable perimeter lengths for each grid cell
@@ -383,9 +383,9 @@ namespace Madingley
         /// <param name="specificLocations">Whether the model is to be run for specific locations</param>
         /// <param name="runInParallel">Whether model grid cells will be run in parallel</param>
         public ModelGrid(float minLat, float minLon, float maxLat, float maxLon, float latCellSize, float lonCellSize, List<uint[]> cellList, 
-            SortedList<string, EnviroData> enviroStack ,SortedList<string, EnviroData> enviroStackTemporal, FunctionalGroupDefinitions cohortFunctionalGroups,
-            FunctionalGroupDefinitions stockFunctionalGroups, SortedList<string, double> globalDiagnostics, Boolean tracking,
-            Boolean specificLocations, Boolean runInParallel, string globalModelTimeStepUnit)
+            SortedList<string, EnviroData> enviroStack, SortedList<string, EnviroData> enviroStackTemporal, FunctionalGroupDefinitions cohortFunctionalGroups,
+            FunctionalGroupDefinitions stockFunctionalGroups, SortedList<string, double> globalDiagnostics, Boolean tracking, 
+            Boolean specificLocations, Boolean runInParallel)
         { 
             // Add one to the counter of the number of grids. If there is more than one model grid, exit the program with a debug crash.
             NumGrids = NumGrids + 1;
@@ -458,8 +458,8 @@ namespace Madingley
                 {
                     // Create the grid cell at the specified position
                     InternalGrid[cellList[ii][0], cellList[ii][1]] = new GridCell(_Lats[cellList[ii][0]], cellList[ii][0],
-                        _Lons[cellList[ii][1]], cellList[ii][1], latCellSize, lonCellSize, enviroStack,enviroStackTemporal, _GlobalMissingValue,
-                        cohortFunctionalGroups, stockFunctionalGroups, globalDiagnostics, tracking, specificLocations, globalModelTimeStepUnit);
+                        _Lons[cellList[ii][1]], cellList[ii][1], latCellSize, lonCellSize, enviroStack, enviroStackTemporal, _GlobalMissingValue,
+                        cohortFunctionalGroups, stockFunctionalGroups, globalDiagnostics, tracking, specificLocations);
                     if (!specificLocations)
                     {
                         CellsForDispersal[cellList[ii][0], cellList[ii][1]] = new List<uint[]>();
@@ -485,7 +485,7 @@ namespace Madingley
                     // Create the grid cell at the specified position
                     InternalGrid[cellList[ii][0], cellList[ii][1]] = new GridCell(_Lats[cellList[ii][0]], cellList[ii][0],
                         _Lons[cellList[ii][1]], cellList[ii][1], latCellSize, lonCellSize, enviroStack, enviroStackTemporal, _GlobalMissingValue,
-                        cohortFunctionalGroups, stockFunctionalGroups, globalDiagnostics, tracking, specificLocations, globalModelTimeStepUnit);
+                        cohortFunctionalGroups, stockFunctionalGroups, globalDiagnostics, tracking, specificLocations);
                     if (!specificLocations)
                     {
                         CellsForDispersal[cellList[ii][0], cellList[ii][1]] = new List<uint[]>();
@@ -502,7 +502,7 @@ namespace Madingley
 
             if (!specificLocations)
             {
-                InterpolateMissingValues(globalModelTimeStepUnit);
+                InterpolateMissingValues();
 
 
                 // Fill in the array of dispersable perimeter lengths for each grid cell
@@ -527,7 +527,7 @@ namespace Madingley
         /// <summary>
         /// Estimates missing environmental data for grid cells by interpolation
         /// </summary>
-        public void InterpolateMissingValues(string globalModelTimeStepUnit)
+        public void InterpolateMissingValues()
         {
             SortedList<string, double[]> WorkingCellEnvironment = new SortedList<string, double[]>();
             Boolean Changed = false;
@@ -545,7 +545,7 @@ namespace Madingley
                         WorkingCellEnvironment["NPP"] = GetInterpolatedValues(ii, jj, GetCellLatitude(ii), GetCellLongitude(jj), "NPP", WorkingCellEnvironment["Realm"][0]);
                         
                         //Calculate NPP seasonality - for use in converting annual NPP estimates to monthly
-                        WorkingCellEnvironment["Seasonality"] = InternalGrid[ii, jj].CalculateNPPSeasonality(WorkingCellEnvironment["NPP"], WorkingCellEnvironment["Missing Value"][0], globalModelTimeStepUnit);
+                        WorkingCellEnvironment["Seasonality"] = InternalGrid[ii, jj].CalculateNPPSeasonality(WorkingCellEnvironment["NPP"], WorkingCellEnvironment["Missing Value"][0]);
                         Changed = true;
                     }
                     // Otherwise convert the missing data values to zeroes where they exist amongst valid data eg in polar regions.
@@ -555,13 +555,13 @@ namespace Madingley
                     }
 
                     // If the cell environment does not contain valid monthly mean diurnal temperature range data then interpolate values
-                    //if (InternalGrid[ii, jj].ContainsMissingValue(WorkingCellEnvironment["DiurnalTemperatureRange"], WorkingCellEnvironment["Missing Value"][0]))
-                    //{
-                    //    //If NPP doesn't exist the interpolate from surrounding values (of the same realm)
-                    //    WorkingCellEnvironment["DiurnalTemperatureRange"] = FillWithInterpolatedValues(ii, jj, GetCellLatitude(ii), GetCellLongitude(jj), "DiurnalTemperatureRange", WorkingCellEnvironment["Realm"][0]);
+                    if (InternalGrid[ii, jj].ContainsMissingValue(WorkingCellEnvironment["DiurnalTemperatureRange"], WorkingCellEnvironment["Missing Value"][0]))
+                    {
+                        //If NPP doesn't exist the interpolate from surrounding values (of the same realm)
+                        WorkingCellEnvironment["DiurnalTemperatureRange"] = FillWithInterpolatedValues(ii, jj, GetCellLatitude(ii), GetCellLongitude(jj), "DiurnalTemperatureRange", WorkingCellEnvironment["Realm"][0]);
 
-                    //    Changed = true;
-                    //}
+                        Changed = true;
+                    }
 
                     // Same for u and v velocities
                     if (!InternalGrid[ii, jj].ContainsData(WorkingCellEnvironment["uVel"], WorkingCellEnvironment["Missing Value"][0]))
@@ -756,13 +756,13 @@ namespace Madingley
 
 
             //Check to see if the correct number of functional groups exist in the definitions file and in the input state
-            /*if (cohortFunctionalGroupDefinitions.GetNumberOfFunctionalGroups() != inputModelState.GridCellCohorts[
-                this.GetLatIndex(InternalGrid[cellIndices[0][0], cellIndices[0][1]].Latitude),
-                this.GetLonIndex(InternalGrid[cellIndices[0][0], cellIndices[0][1]].Longitude)].Count)
+
+            if (cohortFunctionalGroupDefinitions.GetNumberOfFunctionalGroups() != inputModelState.GridCellCohorts[
+                cellIndices[0][0],cellIndices[0][1]].Count)
             {
                 Console.WriteLine("Mismatch in the number of functional groups defined in CohortFunctionalGroupDefinitions.csv set-up file and the Model State being read in");
                 Environment.Exit(0);
-            }*/
+            }
 
             int[] TerrestrialStockFunctionalIndices = stockFunctionalGroupDefinitions.GetFunctionalGroupIndex("Realm", "Terrestrial", false);
             int[] MarineStockFunctionalIndices = stockFunctionalGroupDefinitions.GetFunctionalGroupIndex("Realm", "Marine", false);
@@ -770,123 +770,74 @@ namespace Madingley
             int[] TerrestrialCohortFunctionalIndices = cohortFunctionalGroupDefinitions.GetFunctionalGroupIndex("Realm", "Terrestrial", false);
             int[] MarineCohortFunctionalIndices = cohortFunctionalGroupDefinitions.GetFunctionalGroupIndex("Realm", "Marine", false);
 
-            //Input state is held as a grid, not list of cells. So need to convert the cell list indices to lat/lon indices
-            uint InputStateLatInd;
-            uint InputStateLonInd;
+
             foreach (uint[] cellIndexPair in cellIndices)
             {
-                InputStateLatInd = this.GetLatIndex(InternalGrid[cellIndexPair[0], cellIndexPair[1]].Latitude);
-                InputStateLonInd = this.GetLonIndex(InternalGrid[cellIndexPair[0], cellIndexPair[1]].Longitude);
 
-                //if (InternalGrid[cellIndexPair[0], cellIndexPair[1]].CellEnvironment["Realm"][0] == 1)
+                for (int i = 0; i < inputModelState.GridCellCohorts[cellIndexPair[0], cellIndexPair[1]].Count; i++)
                 {
+                    InternalGrid[cellIndexPair[0], cellIndexPair[1]].GridCellCohorts[i] = new List<Cohort>();
+                }
+                //Check which cohorts should be initialised for each cell
+                if (InternalGrid[cellIndexPair[0], cellIndexPair[1]].CellEnvironment["Realm"][0] == 1)
+                {
+                    //This is a terrestrial cell so only add the terrestrial stocks
                     foreach (int fg in TerrestrialCohortFunctionalIndices)
                     {
-                        InternalGrid[cellIndexPair[0], cellIndexPair[1]].GridCellCohorts[fg] = new List<Cohort>();
-                    }
-                    foreach (int fg in TerrestrialStockFunctionalIndices)
-                    {
-                        InternalGrid[cellIndexPair[0], cellIndexPair[1]].GridCellStocks[fg] = new List<Stock>();
+                        //Cohort[] tempGridCellCohorts = (Cohort[])inputModelState.GridCellCohorts[cellIndexPair[0], cellIndexPair[1]][fg].ToArray().Clone();
+                        //Cohort[] tempGridCellCohorts = (Cohort[])Array.ConvertAll(inputModelState.GridCellCohorts[cellIndexPair[0], cellIndexPair[1]][fg].ToArray(),
+                        //    element => (Cohort)element.Clone());
+                        Cohort[] tempGridCellCohorts = inputModelState.GridCellCohorts[cellIndexPair[0], cellIndexPair[1]][fg].ToArray().Select(cohort => new Cohort(cohort)).ToArray();
+                        InternalGrid[cellIndexPair[0], cellIndexPair[1]].GridCellCohorts[fg] = tempGridCellCohorts.ToList();
                     }
                 }
-                //else
+                else
                 {
+                    // this is a marine cell so only add the marine stocks
                     foreach (int fg in MarineCohortFunctionalIndices)
                     {
-                        InternalGrid[cellIndexPair[0], cellIndexPair[1]].GridCellCohorts[fg] = new List<Cohort>();
+                        //Cohort[] tempGridCellCohorts = (Cohort[])inputModelState.GridCellCohorts[cellIndexPair[0], cellIndexPair[1]][fg].ToArray().Clone(); 
+                        //Cohort[] tempGridCellCohorts = (Cohort[])Array.ConvertAll(inputModelState.GridCellCohorts[cellIndexPair[0], cellIndexPair[1]][fg].ToArray(),
+                        //     element => (Cohort)element.Clone());
+                        Cohort[] tempGridCellCohorts = inputModelState.GridCellCohorts[cellIndexPair[0], cellIndexPair[1]][fg].ToArray().Select(cohort => new Cohort(cohort)).ToArray();
+                        InternalGrid[cellIndexPair[0], cellIndexPair[1]].GridCellCohorts[fg] = tempGridCellCohorts.ToList();
                     }
+                }
+
+
+
+                for (int i = 0; i < inputModelState.GridCellStocks[cellIndexPair[0], cellIndexPair[1]].Count; i++)
+                {
+                    InternalGrid[cellIndexPair[0], cellIndexPair[1]].GridCellStocks[i] = new List<Stock>();
+                }
+
+
+                //Check which stocks should be initialised for each cell
+                if (InternalGrid[cellIndexPair[0], cellIndexPair[1]].CellEnvironment["Realm"][0] == 1)
+                {
+                    //This is a terrestrial cell so only add the terrestrial stocks
+                    foreach (int fg in TerrestrialStockFunctionalIndices)
+                    {
+                        //Stock[] tempGridCellStocks = (Stock[])inputModelState.GridCellStocks[cellIndexPair[0], cellIndexPair[1]][fg].ToArray().Clone();
+                        //Stock[] tempGridCellStocks = (Stock[])Array.ConvertAll(inputModelState.GridCellStocks[cellIndexPair[0], cellIndexPair[1]][fg].ToArray(),
+                        //     element => (Stock)element.Clone());
+                        Stock[] tempGridCellStocks = inputModelState.GridCellStocks[cellIndexPair[0], cellIndexPair[1]][fg].ToArray().Select(stock => new Stock(stock)).ToArray();
+                        InternalGrid[cellIndexPair[0], cellIndexPair[1]].GridCellStocks[fg] = tempGridCellStocks.ToList();
+                    }
+                }
+                else
+                {
+                    // this is a marine cell so only add the marine stocks
                     foreach (int fg in MarineStockFunctionalIndices)
                     {
-                        InternalGrid[cellIndexPair[0], cellIndexPair[1]].GridCellStocks[fg] = new List<Stock>();
+                        //Stock[] tempGridCellStocks = (Stock[])inputModelState.GridCellStocks[cellIndexPair[0], cellIndexPair[1]][fg].ToArray().Clone();
+                        //Stock[] tempGridCellStocks = (Stock[])Array.ConvertAll(inputModelState.GridCellStocks[cellIndexPair[0], cellIndexPair[1]][fg].ToArray(),
+                        //     element => (Stock)element.Clone());
+                        Stock[] tempGridCellStocks = inputModelState.GridCellStocks[cellIndexPair[0], cellIndexPair[1]][fg].ToArray().Select(stock => new Stock(stock)).ToArray();
+                        InternalGrid[cellIndexPair[0], cellIndexPair[1]].GridCellStocks[fg] = tempGridCellStocks.ToList();
                     }
                 }
 
-                if (inputModelState.GridCellCohorts[InputStateLatInd, InputStateLonInd] != null)
-                {
-                    /*for (int i = 0; i < inputModelState.GridCellCohorts[InputStateLatInd, InputStateLonInd].Count; i++)
-                    {
-                        InternalGrid[cellIndexPair[0], cellIndexPair[1]].GridCellCohorts[i] = new List<Cohort>();
-                    }*/
-                    //Check which cohorts should be initialised for each cell
-                    if (InternalGrid[cellIndexPair[0], cellIndexPair[1]].CellEnvironment["Realm"][0] == 1)
-                    {
-                        //This is a terrestrial cell so only add the terrestrial stocks
-                        foreach (int fg in TerrestrialCohortFunctionalIndices)
-                        {
-                            //Cohort[] tempGridCellCohorts = (Cohort[])inputModelState.GridCellCohorts[cellIndexPair[0], cellIndexPair[1]][fg].ToArray().Clone();
-                            //Cohort[] tempGridCellCohorts = (Cohort[])Array.ConvertAll(inputModelState.GridCellCohorts[cellIndexPair[0], cellIndexPair[1]][fg].ToArray(),
-                            //    element => (Cohort)element.Clone());
-                            if (inputModelState.GridCellCohorts[InputStateLatInd, InputStateLonInd][fg] != null)
-                            {
-
-
-                                Cohort[] tempGridCellCohorts =
-                                    inputModelState.GridCellCohorts[InputStateLatInd, InputStateLonInd][fg].ToArray().Select(cohort => new Cohort(cohort)).ToArray();
-                                InternalGrid[cellIndexPair[0], cellIndexPair[1]].GridCellCohorts[fg] = tempGridCellCohorts.ToList();
-                            }
-                        }
-                    }
-
-                    else
-                    {
-                        // this is a marine cell so only add the marine stocks
-                        foreach (int fg in MarineCohortFunctionalIndices)
-                        {
-                            //Cohort[] tempGridCellCohorts = (Cohort[])inputModelState.GridCellCohorts[cellIndexPair[0], cellIndexPair[1]][fg].ToArray().Clone(); 
-                            //Cohort[] tempGridCellCohorts = (Cohort[])Array.ConvertAll(inputModelState.GridCellCohorts[cellIndexPair[0], cellIndexPair[1]][fg].ToArray(),
-                            //     element => (Cohort)element.Clone());
-                            if (inputModelState.GridCellCohorts[InputStateLatInd, InputStateLonInd][fg] != null)
-                            {
-                                Cohort[] tempGridCellCohorts = inputModelState.GridCellCohorts[InputStateLatInd, InputStateLonInd][fg].ToArray().Select(cohort => new Cohort(cohort)).ToArray();
-                                InternalGrid[cellIndexPair[0], cellIndexPair[1]].GridCellCohorts[fg] = tempGridCellCohorts.ToList();
-                            }
-                        }
-                    }
-                }
-
-
-
-
-                if (inputModelState.GridCellStocks[InputStateLatInd, InputStateLonInd] != null)
-                {
-                    /*for (int i = 0; i < inputModelState.GridCellStocks[InputStateLatInd, InputStateLonInd].Count; i++)
-                    {
-                        InternalGrid[cellIndexPair[0], cellIndexPair[1]].GridCellStocks[i] = new List<Stock>();
-                    }*/
-
-
-                    //Check which stocks should be initialised for each cell
-                    if (InternalGrid[cellIndexPair[0], cellIndexPair[1]].CellEnvironment["Realm"][0] == 1)
-                    {
-                        //This is a terrestrial cell so only add the terrestrial stocks
-                        foreach (int fg in TerrestrialStockFunctionalIndices)
-                        {
-                            //Stock[] tempGridCellStocks = (Stock[])inputModelState.GridCellStocks[cellIndexPair[0], cellIndexPair[1]][fg].ToArray().Clone();
-                            //Stock[] tempGridCellStocks = (Stock[])Array.ConvertAll(inputModelState.GridCellStocks[cellIndexPair[0], cellIndexPair[1]][fg].ToArray(),
-                            //     element => (Stock)element.Clone());
-                            if (inputModelState.GridCellStocks[InputStateLatInd, InputStateLonInd][fg] != null)
-                            {
-                                Stock[] tempGridCellStocks = inputModelState.GridCellStocks[InputStateLatInd, InputStateLonInd][fg].ToArray().Select(stock => new Stock(stock)).ToArray();
-                                InternalGrid[cellIndexPair[0], cellIndexPair[1]].GridCellStocks[fg] = tempGridCellStocks.ToList();
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // this is a marine cell so only add the marine stocks
-                        foreach (int fg in MarineStockFunctionalIndices)
-                        {
-                            //Stock[] tempGridCellStocks = (Stock[])inputModelState.GridCellStocks[cellIndexPair[0], cellIndexPair[1]][fg].ToArray().Clone();
-                            //Stock[] tempGridCellStocks = (Stock[])Array.ConvertAll(inputModelState.GridCellStocks[cellIndexPair[0], cellIndexPair[1]][fg].ToArray(),
-                            //     element => (Stock)element.Clone());
-                            if (inputModelState.GridCellStocks[InputStateLatInd, InputStateLonInd][fg] != null)
-                            {
-                                Stock[] tempGridCellStocks = inputModelState.GridCellStocks[InputStateLatInd, InputStateLonInd][fg].ToArray().Select(stock => new Stock(stock)).ToArray();
-                                InternalGrid[cellIndexPair[0], cellIndexPair[1]].GridCellStocks[fg] = tempGridCellStocks.ToList();
-                            }
-                        }
-                    }
-                }
                 Console.Write("\rGrid Cell: {0} of {1}", ii++, cellIndices.Count);
 
             }
@@ -913,8 +864,7 @@ namespace Madingley
         /// <param name="dispersalOnlyType">For dispersal only runs, the type of dispersal to apply</param>
         public void SeedGridCellStocksAndCohorts(List<uint[]> cellIndices, FunctionalGroupDefinitions cohortFunctionalGroupDefinitions,
             FunctionalGroupDefinitions stockFunctionalGroupDefinitions, SortedList<string, double> globalDiagnostics, ref Int64 nextCohortID,
-            Boolean tracking, Boolean DrawRandomly, Boolean dispersalOnly, string dispersalOnlyType, Boolean runCellsInParallel, 
-            SortedList<string, EnviroData> dataLayers, float latCellSize, float lonCellSize)
+            Boolean tracking, Boolean DrawRandomly, Boolean dispersalOnly, string dispersalOnlyType, Boolean runCellsInParallel)
         {
             Console.WriteLine("Seeding grid cell stocks and cohorts:");
 
@@ -981,19 +931,19 @@ namespace Madingley
                             {
                                 InternalGrid[cellIndices[ii][0], cellIndices[ii][1]].SeedGridCellCohortsAndStocks(cohortFunctionalGroupDefinitions,
                                 stockFunctionalGroupDefinitions, globalDiagnostics, StartingCohortsID[ii], tracking, TotalTerrestrialCellCohorts, TotalMarineCellCohorts,
-                                DrawRandomly, false, dataLayers, latCellSize, lonCellSize);
+                                DrawRandomly, false);
                             }
                             else if ((cellIndices[ii][0] == 95) && (cellIndices[ii][1] == 110))
                             {
                                 InternalGrid[cellIndices[ii][0], cellIndices[ii][1]].SeedGridCellCohortsAndStocks(cohortFunctionalGroupDefinitions,
                                 stockFunctionalGroupDefinitions, globalDiagnostics, StartingCohortsID[ii], tracking, TotalTerrestrialCellCohorts, TotalMarineCellCohorts,
-                                DrawRandomly, false, dataLayers, latCellSize, lonCellSize);
+                                DrawRandomly, false);
                             }
                             else
                             {
                                 InternalGrid[cellIndices[ii][0], cellIndices[ii][1]].SeedGridCellCohortsAndStocks(cohortFunctionalGroupDefinitions,
                                 stockFunctionalGroupDefinitions, globalDiagnostics, StartingCohortsID[ii], tracking, TotalTerrestrialCellCohorts, TotalMarineCellCohorts,
-                                DrawRandomly, true, dataLayers, latCellSize, lonCellSize);
+                                DrawRandomly, true);
                             }
                             Console.Write("\rGrid Cell: {0} of {1}", ii++, cellIndices.Count);
                         }
@@ -1025,14 +975,14 @@ namespace Madingley
                                 InternalGrid[cellIndices[ii][0], cellIndices[ii][1]].SeedGridCellCohortsAndStocks(
                                     cohortFunctionalGroupDefinitions, stockFunctionalGroupDefinitions, globalDiagnostics,
                                     StartingCohortsID[ii], tracking, TotalTerrestrialCellCohorts, TotalMarineCellCohorts,
-                                    DrawRandomly, true, dataLayers, latCellSize, lonCellSize);
+                                    DrawRandomly, true);
                             }
                             else
                             {
                                 InternalGrid[cellIndices[ii][0], cellIndices[ii][1]].SeedGridCellCohortsAndStocks(
                                     cohortFunctionalGroupDefinitions, stockFunctionalGroupDefinitions, globalDiagnostics,
                                     StartingCohortsID[ii], tracking, TotalTerrestrialCellCohorts, TotalMarineCellCohorts,
-                                    DrawRandomly, false, dataLayers, latCellSize, lonCellSize);
+                                    DrawRandomly, false);
                             }
                             Console.Write("\rGrid Cell: {0} of {1}", ii++, cellIndices.Count);
                         }
@@ -1042,7 +992,7 @@ namespace Madingley
 
                             InternalGrid[cellIndices[ii][0], cellIndices[ii][1]].SeedGridCellCohortsAndStocks(cohortFunctionalGroupDefinitions,
                             stockFunctionalGroupDefinitions, globalDiagnostics, StartingCohortsID[ii], tracking, TotalTerrestrialCellCohorts, TotalMarineCellCohorts,
-                            DrawRandomly, true, dataLayers, latCellSize, lonCellSize);
+                            DrawRandomly, true);
 
                         }
                         else
@@ -1057,7 +1007,7 @@ namespace Madingley
                         InternalGrid[cellIndices[ii][0], cellIndices[ii][1]].SeedGridCellCohortsAndStocks(
                             cohortFunctionalGroupDefinitions, stockFunctionalGroupDefinitions, globalDiagnostics,
                             StartingCohortsID[ii], tracking, TotalTerrestrialCellCohorts, TotalMarineCellCohorts,
-                            DrawRandomly, false, dataLayers, latCellSize, lonCellSize);
+                            DrawRandomly, false);
                         Count++;
                     }
                     Console.Write("\rGrid Cell: {0} of {1}", Count, cellIndices.Count);
@@ -1079,19 +1029,19 @@ namespace Madingley
                             {
                                 InternalGrid[cellIndices[ii][0], cellIndices[ii][1]].SeedGridCellCohortsAndStocks(cohortFunctionalGroupDefinitions,
                                 stockFunctionalGroupDefinitions, globalDiagnostics, StartingCohortsID[ii], tracking, TotalTerrestrialCellCohorts, TotalMarineCellCohorts,
-                                DrawRandomly, false, dataLayers, latCellSize, lonCellSize);
+                                DrawRandomly, false);
                             }
                             else if ((cellIndices[ii][0] == 95) && (cellIndices[ii][1] == 110))
                             {
                                 InternalGrid[cellIndices[ii][0], cellIndices[ii][1]].SeedGridCellCohortsAndStocks(cohortFunctionalGroupDefinitions,
                                 stockFunctionalGroupDefinitions, globalDiagnostics, StartingCohortsID[ii], tracking, TotalTerrestrialCellCohorts, TotalMarineCellCohorts,
-                                DrawRandomly, false, dataLayers, latCellSize, lonCellSize);
+                                DrawRandomly, false);
                             }
                             else
                             {
                                 InternalGrid[cellIndices[ii][0], cellIndices[ii][1]].SeedGridCellCohortsAndStocks(cohortFunctionalGroupDefinitions,
                                 stockFunctionalGroupDefinitions, globalDiagnostics, StartingCohortsID[ii], tracking, TotalTerrestrialCellCohorts, TotalMarineCellCohorts,
-                                DrawRandomly, true, dataLayers, latCellSize, lonCellSize);
+                                DrawRandomly, true);
                             }
                             Console.Write("\rGrid Cell: {0} of {1}", ii++, cellIndices.Count);
                         }
@@ -1123,14 +1073,14 @@ namespace Madingley
                                 InternalGrid[cellIndices[ii][0], cellIndices[ii][1]].SeedGridCellCohortsAndStocks(
                                     cohortFunctionalGroupDefinitions, stockFunctionalGroupDefinitions, globalDiagnostics,
                                     StartingCohortsID[ii], tracking, TotalTerrestrialCellCohorts, TotalMarineCellCohorts,
-                                    DrawRandomly, true, dataLayers, latCellSize, lonCellSize);
+                                    DrawRandomly, true);
                             }
                             else
                             {
                                 InternalGrid[cellIndices[ii][0], cellIndices[ii][1]].SeedGridCellCohortsAndStocks(
                                     cohortFunctionalGroupDefinitions, stockFunctionalGroupDefinitions, globalDiagnostics,
                                     StartingCohortsID[ii], tracking, TotalTerrestrialCellCohorts, TotalMarineCellCohorts,
-                                    DrawRandomly, false, dataLayers, latCellSize, lonCellSize);
+                                    DrawRandomly, false);
                             }
                             Console.Write("\rGrid Cell: {0} of {1}", ii++, cellIndices.Count);
                         }
@@ -1140,7 +1090,7 @@ namespace Madingley
 
                             InternalGrid[cellIndices[ii][0], cellIndices[ii][1]].SeedGridCellCohortsAndStocks(cohortFunctionalGroupDefinitions,
                             stockFunctionalGroupDefinitions, globalDiagnostics, StartingCohortsID[ii], tracking, TotalTerrestrialCellCohorts, TotalMarineCellCohorts,
-                            DrawRandomly, true, dataLayers, latCellSize, lonCellSize);
+                            DrawRandomly, true);
 
                         }
                         else
@@ -1155,7 +1105,7 @@ namespace Madingley
                         InternalGrid[cellIndices[ii][0], cellIndices[ii][1]].SeedGridCellCohortsAndStocks(
                             cohortFunctionalGroupDefinitions, stockFunctionalGroupDefinitions, globalDiagnostics,
                             StartingCohortsID[ii], tracking, TotalTerrestrialCellCohorts, TotalMarineCellCohorts,
-                            DrawRandomly, false, dataLayers, latCellSize, lonCellSize);
+                            DrawRandomly, false);
                         Count++;
                     }
                     Console.Write("\rGrid Cell: {0} of {1}", Count, cellIndices.Count);
@@ -1217,15 +1167,6 @@ namespace Madingley
         {
             return InternalGrid[latIndex, lonIndex].GridCellCohorts[functionalGroup].ElementAt(positionInList);
         }
-
-
-        // Reset the per time step respiratory pool 
-        public void ResetGridCellPerTimestepCO2Pool(uint latIndex, uint lonIndex) 
-        { 
-            InternalGrid[latIndex, lonIndex].SetEnviroLayer("Respiratory CO2 Pool Per Timestep", 0, 0.0);
-            InternalGrid[latIndex, lonIndex].SetEnviroLayer("Respiring Biomass Pool Per Timestep", 0, 0.0); 
-        } 
-
 
         // NOTE TO SELF: These need more error checking, and also the access levels more tightly controlled
         /// <summary>
