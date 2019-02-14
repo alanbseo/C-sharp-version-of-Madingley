@@ -12,3 +12,23 @@
 /Madingley/packages.config
 
 Madingley.VC.db
+/Madingley/Data/New/Land/O_max.nc
+/Madingley/Data/New/Land/H_max.nc
+/Madingley/Data/New/Land/C_max.nc
+/Madingley/Data/SSP/SSP1-RCP2.6HANPP_HYDEpop2006-2070.nc
+/Madingley/Data/SSP/SSP1-RCP2.6FractionalLandUseTransitions2006-2070.nc
+/Madingley/Data/SSP/SSP1-RCP2.6FractionalLandUseStates2006-2070.nc
+/Madingley/Data/SSP/Constant_climate_1dd2p6Climate2005-2099.nc
+/Madingley/Data/SSP/1dd2p6Climate2006-2070.nc
+/Madingley/Data/Original/TropicalGrasslandsMask.nc
+/Madingley/Data/Original/Ocean/OceanNPP.nc
+/Madingley/Data/Original/Ocean/KennedyetalDTR_monthly_climatology.nc
+/Madingley/Data/Original/Ocean/averaged_v_50y_top100m_monthly.nc
+/Madingley/Data/Original/Ocean/averaged_u_50y_top100m_monthly.nc
+/Madingley/Data/Original/Ocean/averaged_SST_50y_top100m_monthly.nc
+/Madingley/Data/Original/LandSeaMask.nc
+/Madingley/Data/Original/Land/NPP.nc
+/Madingley/Data/Original/Land/hanpp_2005.nc
+/Madingley/Data/Original/Land/HANPP.nc
+/Madingley/Data/Original/Land/cru20.nc
+/Madingley/Data/Original/Land/AvailableWaterCapacity.nc

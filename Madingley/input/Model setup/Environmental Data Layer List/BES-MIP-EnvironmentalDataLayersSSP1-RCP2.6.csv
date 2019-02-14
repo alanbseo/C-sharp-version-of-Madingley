@@ -1,0 +1,28 @@
+Source,Folder,Filename,Extension,Dataset Name,Filetype,Internal Layer Name,Static,Resolution,Units
+Local,input/Data/Original,LandSeaMask,.nc,land_sea_mask,nc,LandSeaMask,Y,year,
+Local,input/Data/Original/Land,AvailableWaterCapacity,.nc,AWC,nc,AWC,Y,year,mm
+Local,input/Data/Original/Land,HANPP,.nc,HANPP,nc,HANPP,Y,year,gC/m2/year
+Local,input/Data/Original/Land,NPP,.nc,NPP,nc,LandNPP,Y,month,gC/m2/day
+Local,input/Data/Original/Ocean,OceanNPP,.nc,NPP,nc,OceanNPP,Y,month,gC/m2/day
+Local,input/Data/Original/Ocean,KennedyetalDTR_monthly_climatology,.nc,DTR,nc,OceanDTR,Y,month,degC
+Local,input/Data/Original/Ocean,averaged_u_50y_top100m_monthly,.nc,uVel,nc,uVel,Y,month,cm/s
+Local,input/Data/Original/Ocean,averaged_v_50y_top100m_monthly,.nc,vVel,nc,vVel,Y,month,cm/s
+Local,input/Data/Original/Ocean,averaged_SST_50y_top100m_monthly,.nc,SST,nc,SST,Y,month,degC
+Local,input/Data/SSP,1dd2p6Climate2005-2099,.nc,Temperature,nc,Temperature,N,month,degC
+Local,input/Data/SSP,1dd2p6Climate2005-2099,.nc,DTR,nc,LandDTR,N,month,degC
+Local,input/Data/SSP,1dd2p6Climate2005-2099,.nc,Precipitation,nc,Precipitation,N,month,mm
+Local,input/Data/SSP,1dd2p6Climate2005-2099,.nc,frs,nc,FrostDays,N,month,
+Local,input/Data/New/Land,H_max,.nc,H_max,nc,Max_Size_10,Y,year,n/a
+Local,input/Data/New/Land,C_max,.nc,C_max,nc,Max_Size_11,Y,year,n/a
+Local,input/Data/New/Land,O_max,.nc,O_max,nc,Max_Size_12,Y,year,n/a
+Local,input/Data/SSP,SSP1_HANPP_HYDEpop_2005-2099,.nc,HANPPharvest,nc,HANPPharvest,N,multi-year,gC/m2/day
+Local,input/Data/SSP,SSP1_HANPP_HYDEpop_2005-2099,.nc,HANPPluc,nc,HANPPlc,N,multi-year,gC/m2/day
+Local,input/Data/SSP,SSP1_FractionalLandUseStates2005-2099,.nc,Furban,nc,Furban,N,multi-year,gC/m2/day
+Local,input/Data/SSP,SSP1_FractionalLandUseStates2005-2099,.nc,Fcropland,nc,Fcropland,N,multi-year,gC/m2/day
+Local,input/Data/SSP,SSP1_FractionalLandUseStates2005-2099,.nc,Fgrazing,nc,Fgrazing,N,multi-year,gC/m2/day
+Local,input/Data/SSP,SSP1_FractionalLandUseStates2005-2099,.nc,Fforest,nc,Fforest,N,multi-year,gC/m2/day
+Local,input/Data/SSP,SSP1_FractionalLandUseStates2005-2099,.nc,Fnatural,nc,Fnatural,N,multi-year,gC/m2/day
+Local,input/Data/SSP,SSP1_FractionalLandUseStates2005-2099,.nc,Fsecondary,nc,Fsecondary,N,multi-year,gC/m2/day
+Local,input/Data/SSP,SSP1_FractionalLandUseTransitions2005-2099,.nc,Primary losses,nc,Primary loss,N,multi-year,gC/m2/day
+Local,input/Data/SSP,SSP1_FractionalLandUseTransitions2005-2099,.nc,Secondary losses,nc,Secondary loss,N,multi-year,gC/m2/day
+Local,input/Data/SSP,SSP1_FractionalLandUseTransitions2005-2099,.nc,Secondary gains,nc,Secondary gain,N,multi-year,gC/m2/day

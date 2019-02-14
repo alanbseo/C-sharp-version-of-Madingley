@@ -38,8 +38,8 @@ Herbivory.RevisedHerbivory.Marine.HandlingTimeExponent,0.7,
 Herbivory.RevisedHerbivory.Terrestrial.HandlingTimeExponent,0.7,
 Herbivory.RevisedHerbivory.HandlingTimeReferenceMass,1,
 Herbivory.RevisedHerbivory.RateMassExponent,1,
-Herbivory.RevisedHerbivory.RateConstant,1.00E-11,
-Herbivory.RevisedHerbivory.Terrestrial.AttackRateExponent,2,
+Herbivory.RevisedHerbivory.RateConstant,3.1E5,TIII = 1.00E-11; TII = 3.1E5
+Herbivory.RevisedHerbivory.Terrestrial.AttackRateExponent,1,
 Herbivory.RevisedHerbivory.Marine.AttackRateExponent,2,
 Predation.RevisedPredation.TimeUnitImplementation,0,0 = day; 1 = month; 2 = year
 Predation.RevisedPredation.Terrestrial.HandlingTimeScalar,0.5,

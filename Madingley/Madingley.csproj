@@ -265,6 +265,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram1.cd" />
+    <None Include="input\Data\New\Land\C_max.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Data\New\Land\H_max.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Data\New\Land\O_max.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="input\Data\Original\LandSeaMask.nc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -301,6 +310,23 @@
     <None Include="input\Data\Original\TropicalGrasslandsMask.nc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="input\Data\SSP\1dd2p6Climate2006-2070.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Data\SSP\Constant_climate_1dd2p6Climate2005-2099.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Data\SSP\SSP1-RCP2.6FractionalLandUseStates2006-2070.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Data\SSP\SSP1-RCP2.6FractionalLandUseTransitions2006-2070.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Data\SSP\SSP1-RCP2.6HANPP_HYDEpop2006-2070.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Model setup\BES-MIP-SimulationControlParameters.csv" />
+    <None Include="input\Model setup\BES-MIP_OutputControlParameters.csv" />
     <None Include="input\Model setup\Ecological definition files\CohortFunctionalGroupDefinitions.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -316,9 +342,19 @@
     <None Include="input\Model setup\Ecological definition files\StockFunctionalGroupDefinitions.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="input\Model setup\Environmental data layer list\EnvironmentalDataLayers.csv">
+    <None Include="input\Model setup\Environmental data layer list\BES-MIP-EnvironmentalDataLayersSSP1-RCP2.6.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="input\Model setup\Environmental data layer list\EnvironmentalDataLayers.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Model setup\Environmental data layer list\EnvironmentalDataLayersHoloceneClimate.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Model setup\Environmental data layer list\EnvironmentalDataLayersSSP1-RCP2.6.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Model setup\Environmental data layer list\EnvironmentalDataLayers_backup.csv" />
     <None Include="input\Model setup\FileLocationParameters.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -334,6 +370,7 @@
     <None Include="input\Model setup\OutputControlParameters.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="input\Model setup\RestartTestSimulationControlParameters.csv" />
     <None Include="input\Model setup\SimulationControlParameters.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
