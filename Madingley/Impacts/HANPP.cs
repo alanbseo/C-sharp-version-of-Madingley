@@ -12,7 +12,9 @@ namespace Madingley
     /// <remarks>Assumes that autotroph matter is appropriated evenly from different stocks in proportion to their biomass</remarks>
     public class HumanAutotrophMatterAppropriation
     {
-        //Global mean HANPP from harvesting values from Haberl et al. (2007), PNAS
+        //Global mean HANPP from harvesting values from Haberl et al. (2007), PNAS 
+        // Table 2. Breakdown of global HANPP harvest (excluding human-induced fires) in the year 2000 to land-use classes
+        // gC/m2/yr
         double HANPPh_crop = 296;
         double HANPPh_wilderness = 0.0;
         double HANPPh_grazing = 41;
@@ -58,7 +60,7 @@ namespace Madingley
                 double m2Tokm2Conversion = 1000000.0;
 
 
-                if (humanNPPScenario.Item1 == "hanpp")
+                if (humanNPPScenario.Item1 == "hanpp") //static hanpp 
                 {
 
                     if (currentTimestep > burninSteps)
@@ -121,7 +123,7 @@ namespace Madingley
                         //if (gridCellStocks[actingStock].TotalBiomass < 0.0) gridCellStocks[actingStock].TotalBiomass = 0.0;
                     }
                 }
-                else if(humanNPPScenario.Item1 == "ssp")
+                else if(humanNPPScenario.Item1 == "ssp") // annual hanpp input
                 {
                     //The scenario year calculation removes the need for this if check and allows the burnin period to have HANPP applied
                     //if (currentTimestep > burninSteps)
@@ -187,7 +189,7 @@ namespace Madingley
                         double WetMatterAppropriated = DryMatterAppropriated * 2;
 
 
-                        //Calculate the rate of HANPP offtake
+                        //Calculate the rate of HANPP offtake (%)
                         if (wetMatterNPP.CompareTo(0.0) == 0)
                         {
                             RemovalRate = 0.0;
@@ -326,8 +328,9 @@ namespace Madingley
 
         public double FracImpactedHANPPh(double ffor, double fcrop, double furb, double fgra)
         {
+            
             double FracImpHANPPh = (fcrop*HANPPh_crop + furb*HANPPh_urban + fgra*HANPPh_grazing)/
-                (fcrop * HANPPh_crop + furb * HANPPh_urban + fgra * HANPPh_grazing + ffor * HANPPh_forestry);
+                (fcrop * HANPPh_crop + furb * HANPPh_urban + fgra * HANPPh_grazing + ffor * HANPPh_forestry); // weighted averaging to obtain fraction (%)
 
             //Prevent NaNs arising from division by zero
             if (double.IsNaN(FracImpHANPPh)) FracImpHANPPh = 0.0;
