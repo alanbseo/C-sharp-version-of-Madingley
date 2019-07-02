@@ -123,7 +123,7 @@ namespace Madingley
                         //if (gridCellStocks[actingStock].TotalBiomass < 0.0) gridCellStocks[actingStock].TotalBiomass = 0.0;
                     }
                 }
-                else if(humanNPPScenario.Item1 == "ssp") // annual hanpp input
+                else if (humanNPPScenario.Item1 == "ssp") // annual hanpp (gC/m2/yr) input
                 {
                     //The scenario year calculation removes the need for this if check and allows the burnin period to have HANPP applied
                     //if (currentTimestep > burninSteps)
@@ -138,13 +138,13 @@ namespace Madingley
 
                         HANPPh *= cellEnvironment["Seasonality"][currentTimestep % 12];
                         HANPPlc *= cellEnvironment["Seasonality"][currentTimestep % 12];
-                        
+
                         //Allocate HANPP to this stock depending on its definition
-                        
+
                         //Allocate HANPP between deciduous and evergreen according to FracEvergreen
                         if (madingleyStockDefinitions.GetTraitNames("leaf strategy", actingStock[0]).Equals("deciduous"))
                         {
-                            HANPPlc *= (1.0 -fracEvergreen);
+                            HANPPlc *= (1.0 - fracEvergreen);
                             HANPPh *= (1.0 - fracEvergreen);
                         }
                         else
@@ -153,12 +153,13 @@ namespace Madingley
                             HANPPh *= (fracEvergreen);
                         }
                         //Allocate between impacted and natural using fractional cell area
-                        if (madingleyStockDefinitions.GetTraitNames("impact state",actingStock[0]).Equals("primary"))
+                        if (madingleyStockDefinitions.GetTraitNames("impact state", actingStock[0]).Equals("primary"))
                         {
                             //No Hanpp from land cover change in natural lands
                             HANPPlc *= 0.0;
                             HANPPh *= 0.0;
-                        } else if (madingleyStockDefinitions.GetTraitNames("impact state", actingStock[0]).Equals("secondary"))
+                        }
+                        else if (madingleyStockDefinitions.GetTraitNames("impact state", actingStock[0]).Equals("secondary"))
                         {
                             //No Hanpp from land cover change in natural lands
                             HANPPlc *= 0.0;
@@ -197,6 +198,41 @@ namespace Madingley
                         else
                         {
                             RemovalRate = Math.Min(1.0, WetMatterAppropriated / wetMatterNPP);
+                        }
+
+                    }
+                }
+                else if (humanNPPScenario.Item1 == "hanpp_crafty") // annual hanpp (%) input
+                {
+                    //The scenario year calculation removes the need for this if check and allows the burnin period to have HANPP applied
+                    //if (currentTimestep > burninSteps)
+                    {
+                        // Get the total amount of NPP appropriated by humans from this cell
+                        double HANPPh_p = cellEnvironment["HANPPharvestPerc"][scenarioYear];
+                        double HANPPlc_p = cellEnvironment["HANPPlcPerc"][scenarioYear];
+
+                        // If HANPP value is missing, then assume zero
+                        if (HANPPh_p == cellEnvironment["Missing Value"][0]) HANPPh_p = 0.0;
+                        if (HANPPlc_p == cellEnvironment["Missing Value"][0]) HANPPlc_p = 0.0;
+
+                        // Seasonal variations
+                        HANPPh_p *= cellEnvironment["Seasonality"][currentTimestep % 12];
+                        HANPPlc_p *= cellEnvironment["Seasonality"][currentTimestep % 12];
+
+                        //Allocate HANPP to this stock depending on its definition
+
+
+                        //Combine harvest and land change terms (%)
+                        double HANPP_p = HANPPh_p + HANPPlc_p;
+
+                        //Calculate the rate of HANPP offtake (%)
+                        if (wetMatterNPP.CompareTo(0.0) == 0)
+                        {
+                            RemovalRate = 0.0;
+                        }
+                        else
+                        {
+                            RemovalRate = Math.Min(1.0, HANPP_p);
                         }
 
                     }
@@ -318,6 +354,11 @@ namespace Madingley
                 {
                     Debug.Fail("There is no method for the human extraction of NPP scenario specified");
                 }
+
+            } else {
+                // not impacted cells 
+                // do nothing 
+
 
             }
 
