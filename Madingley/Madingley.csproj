@@ -316,6 +316,12 @@
     <None Include="input\Data\SSP\Constant_climate_1dd2p6Climate2005-2099.nc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="input\Data\SSP\RCP2_6-SSP1_HANPP_CRAFTY_2016-2096.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Data\SSP\RCP8_5-SSP5_HANPP_CRAFTY_2016-2096.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="input\Data\SSP\SSP1-RCP2.6FractionalLandUseStates2006-2070.nc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -352,6 +358,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="input\Model setup\Environmental data layer list\EnvironmentalDataLayersSSP1-RCP2.6.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Model setup\Environmental data layer list\EnvironmentalDataLayersSSP1-RCP2.6_CRAFTY.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="input\Model setup\Environmental data layer list\EnvironmentalDataLayers_backup.csv" />

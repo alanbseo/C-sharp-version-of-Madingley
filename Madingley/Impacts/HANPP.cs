@@ -209,7 +209,7 @@ namespace Madingley
                     {
                         // Get the total amount of NPP appropriated by humans from this cell
                         double HANPPh_p = cellEnvironment["HANPPharvestPerc"][scenarioYear];
-                        double HANPPlc_p = cellEnvironment["HANPPlcPerc"][scenarioYear];
+                        double HANPPlc_p = cellEnvironment["HANPPlucPerc"][scenarioYear];
 
                         // If HANPP value is missing, then assume zero
                         if (HANPPh_p == cellEnvironment["Missing Value"][0]) HANPPh_p = 0.0;
