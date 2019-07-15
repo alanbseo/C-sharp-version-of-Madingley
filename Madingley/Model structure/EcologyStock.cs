@@ -96,45 +96,79 @@ namespace Madingley
             else
             {
                 ScenarioYear = (int)Math.Floor((currentTimeStep-burninSteps) / 12.0);
-                
-                //NEEDS amending as is only set up for terrestrial cells at present.
-                //if (madingleyStockDefinitions.GetTraitNames("Realm", actingStock[0]) == "marine")
-                //{
-                //    // Run the autotroph processor
-                //    MarineNPPtoAutotrophStock.ConvertNPPToAutotroph(cellEnvironment, gridCellStocks, actingStock, environmentalDataUnits["LandNPP"], 
-                //        environmentalDataUnits["OceanNPP"], currentTimeStep,globalModelTimeStepUnit,tracker,globalTracker ,outputDetail,specificLocations,currentMonth);
-                //}
-                //else if (madingleyStockDefinitions.GetTraitNames("Realm", actingStock[0]) == "terrestrial")
-                {
 
-                    if (madingleyStockDefinitions.GetTraitNames("impact state", actingStock[0]) == "primary")
-                    {
-                        loss = cellEnvironment["Primary loss"][ScenarioYear] / 12.0;
-                        //calculate the change in total biomass as a result of coverage changes
-                        // assumes that the biomass density stays the same as coverage goes down (ie if chopping down some forest - the density of the remaining stays the same)
-                        // However if coverage increases, the density declines, as biomass is only added by NPP..
-                        //if (cellEnvironment["Primary loss"][ScenarioYear] < gridCellStocks[actingStock].FractionalArea)
 
-                    }
-                    else if (madingleyStockDefinitions.GetTraitNames("impact state", actingStock[0]) == "secondary")
-                    {
-                        loss = cellEnvironment["Secondary loss"][ScenarioYear] / 12.0;
-                        gain = cellEnvironment["Secondary gain"][ScenarioYear] / 12.0;
 
-                    }
-                    else if (madingleyStockDefinitions.GetTraitNames("impact state", actingStock[0]) == "impacted")
-                    {
+				if (humanNPPScenario.Item1 == "ssp") // annual hanpp (gC/m2/yr) input
+				{
 
-                        loss = cellEnvironment["Secondary gain"][ScenarioYear] / 12.0;
-                        gain = (cellEnvironment["Secondary loss"][ScenarioYear] + cellEnvironment["Primary loss"][ScenarioYear]) / 12.0;
+					//NEEDS amending as is only set up for terrestrial cells at present.
+					//if (madingleyStockDefinitions.GetTraitNames("Realm", actingStock[0]) == "marine")
+					//{
+					//    // Run the autotroph processor
+					//    MarineNPPtoAutotrophStock.ConvertNPPToAutotroph(cellEnvironment, gridCellStocks, actingStock, environmentalDataUnits["LandNPP"], 
+					//        environmentalDataUnits["OceanNPP"], currentTimeStep,globalModelTimeStepUnit,tracker,globalTracker ,outputDetail,specificLocations,currentMonth);
+					//}
+					//else if (madingleyStockDefinitions.GetTraitNames("Realm", actingStock[0]) == "terrestrial")
 
-                    }
 
-                    if(gridCellStocks[actingStock].FractionalArea.CompareTo(0.0) > 0)
-                        gridCellStocks[actingStock].TotalBiomass *= 1.0 - Math.Min(1.0,loss / gridCellStocks[actingStock].FractionalArea);
-                    gridCellStocks[actingStock].FractionalArea = Math.Max(0.0,gridCellStocks[actingStock].FractionalArea - loss + gain);
+					if (madingleyStockDefinitions.GetTraitNames("impact state", actingStock[0]) == "primary")
+					{
+						loss = cellEnvironment["Primary loss"][ScenarioYear] / 12.0;
+						//calculate the change in total biomass as a result of coverage changes
+						// assumes that the biomass density stays the same as coverage goes down (ie if chopping down some forest - the density of the remaining stays the same)
+						// However if coverage increases, the density declines, as biomass is only added by NPP..
+						//if (cellEnvironment["Primary loss"][ScenarioYear] < gridCellStocks[actingStock].FractionalArea)
 
-                }
+					}
+					else if (madingleyStockDefinitions.GetTraitNames("impact state", actingStock[0]) == "secondary")
+					{
+						loss = cellEnvironment["Secondary loss"][ScenarioYear] / 12.0;
+						gain = cellEnvironment["Secondary gain"][ScenarioYear] / 12.0;
+
+					}
+					else if (madingleyStockDefinitions.GetTraitNames("impact state", actingStock[0]) == "impacted")
+					{
+
+						loss = cellEnvironment["Secondary gain"][ScenarioYear] / 12.0;
+						gain = (cellEnvironment["Secondary loss"][ScenarioYear] + cellEnvironment["Primary loss"][ScenarioYear]) / 12.0;
+
+					}
+
+					if (gridCellStocks[actingStock].FractionalArea.CompareTo(0.0) > 0)
+						gridCellStocks[actingStock].TotalBiomass *= 1.0 - Math.Min(1.0, loss / gridCellStocks[actingStock].FractionalArea);
+					gridCellStocks[actingStock].FractionalArea = Math.Max(0.0, gridCellStocks[actingStock].FractionalArea - loss + gain);
+
+				}
+
+
+				// CRAFTY HANPP 
+				else if (humanNPPScenario.Item1 == "hanpp_crafty") // annual hanpp (gC/m2/yr) input
+
+				{
+					// @todo consider impact state.. 
+
+					if (madingleyStockDefinitions.GetTraitNames("Realm", actingStock[0]) == "marine")
+					{
+						// Run the autotroph processor
+						MarineNPPtoAutotrophStock.ConvertNPPToAutotroph(cellEnvironment, gridCellStocks, actingStock, environmentalDataUnits["LandNPP"],
+							environmentalDataUnits["OceanNPP"], currentTimeStep, globalModelTimeStepUnit, tracker, globalTracker, outputDetail, specificLocations, currentMonth);
+					}
+					else if (madingleyStockDefinitions.GetTraitNames("Realm", actingStock[0]) == "terrestrial")
+					{
+
+		 				// have to have another NC file capsuling aft_fractions (17 types) at 0.25 deg grid. 
+						double standingstock_remained_perc = cellEnvironment["standingstock_remained_perc"][ScenarioYear]; // remaind standing stock (%/yr)
+						double monthly_loss = (1 - standingstock_remained_perc) / 12.0; 
+			
+                        // Apply standing stock changes
+                        if (monthly_loss > 0)
+							gridCellStocks[actingStock].TotalBiomass *= 1.0 - Math.Min(1.0, monthly_loss);
+
+                        // @todo fractional area change
+
+					}
+				}
             }
 
             // Run the dynamic plant model to update the leaf stock for this time step
