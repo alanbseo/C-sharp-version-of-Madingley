@@ -158,7 +158,7 @@ namespace Madingley
 					{
 
 		 				// have to have another NC file capsuling aft_fractions (17 types) at 0.25 deg grid. 
-						double standingstock_remained_perc = cellEnvironment["standingstock_remained_perc"][ScenarioYear]; // remaind standing stock (%/yr)
+						double standingstock_remained_perc = cellEnvironment["remained_standingstock_perc"][ScenarioYear]; // remaind standing stock (%/yr)
 						double monthly_loss = (1 - standingstock_remained_perc) / 12.0; 
 			
                         // Apply standing stock changes
